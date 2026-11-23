@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ENTRIX · Panchayat Subscriptions</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0A1F44;--amber:#F2A900;--paper:#EAEEF4;--rule:#C2CDDD;--rule-soft:#E1E7F0;
+  --muted:#5A6B85;--ok:#0F7B4F;--warn:#8A5A00;--bad:#A8231C;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans','Noto Sans Devanagari',system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:13.5px}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.bar{background:var(--ink);color:#fff;padding:13px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.bar .t1{font-weight:700;font-size:15px}
+.bar .t2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.bar .grow{margin-left:auto}
+main{padding:20px 22px 60px;max-width:1280px}
+.btn{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:4px;padding:6.5px 13px;cursor:pointer;font-size:12.5px;white-space:nowrap}
+.btn.ghost{background:#fff;color:var(--ink);border-color:var(--rule)}
+.btn.amber{background:var(--amber);border-color:#D69600;color:#2A1D00;font-weight:600}
+.btn.danger{background:#fff;color:var(--bad);border-color:#E3C2BF}
+.btn.sm{padding:3.5px 8px;font-size:11.5px}
+.btn.light{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--rule);border-radius:5px;padding:12px 13px}
+.stat .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:23px;font-weight:600;margin-top:5px}
+.stat .n{font-size:11px;color:var(--muted)}
+.stat.accent{border-left:3px solid var(--amber)}
+.sheet{background:#fff;border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+.sheetwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:900px}
+th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  padding:8px 11px;background:#F8FAFD;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tbody tr:nth-child(even){background:#FBFCFE}
+tbody tr:hover{background:#F2F7FD}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mr{font-family:'Noto Sans Devanagari',sans-serif}
+.sub{color:var(--muted);font-size:11.5px}
+.right{text-align:right}
+.pill{display:inline-block;padding:1.5px 8px;border-radius:16px;font-size:10.5px;font-weight:600;border:1px solid;white-space:nowrap}
+.p-trial{color:var(--warn);border-color:#E4D5AC;background:#FFFAEE}
+.p-active{color:var(--ok);border-color:#BADCC9;background:#F1F9F5}
+.p-dead{color:var(--bad);border-color:#E6C6C3;background:#FDF4F3}
+.rowacts{display:flex;gap:5px;flex-wrap:wrap}
+.toolbar{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+input,select{padding:6.5px 10px;border:1px solid var(--rule);border-radius:4px;background:#fff}
+.search{min-width:200px}
+.empty{padding:44px;text-align:center;color:var(--muted)}
+#login{position:fixed;inset:0;background:linear-gradient(180deg,#0A1F44,#071634);display:grid;place-items:center;padding:20px;z-index:50}
+#login .box{background:#fff;border-radius:8px;padding:22px;width:100%;max-width:340px}
+#login h2{margin:0 0 4px;font-size:16px}
+#login p{margin:0 0 16px;font-size:12px;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:11px}
+label{font-size:11.5px;font-weight:600;color:var(--muted)}
+.err{color:var(--bad);font-size:12px;min-height:17px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,14px);opacity:0;background:var(--ink);color:#fff;
+  padding:9px 17px;border-radius:4px;font-size:12.5px;transition:.18s;z-index:80;pointer-events:none}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast.bad{background:var(--bad)}
+.note{border-left:3px solid var(--amber);background:#FFFBF2;padding:10px 13px;font-size:12px;color:#5C4A22;margin-top:16px;max-width:76ch}
+@media(max-width:700px){main{padding:14px}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <h2>ENTRIX Admin</h2>
+    <p>Panchayat subscription console</p>
+    <div class="field"><label>Email</label><input id="e" type="email" autocomplete="username"></div>
+    <div class="field"><label>Password</label><input id="p" type="password" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')signIn()"></div>
+    <div class="err" id="err"></div>
+    <button class="btn amber" style="width:100%;padding:9px" onclick="signIn()">Sign in</button>
+  </div>
+</div>
+
+<div class="bar" id="bar" style="display:none">
+  <div><div class="t1">ENTRIX Innovation</div><div class="t2">Panchayat Subscriptions</div></div>
+  <div class="grow"></div>
+  <button class="btn light sm" onclick="load()">Refresh</button>
+  <button class="btn light sm" onclick="exportCSV()">Export CSV</button>
+  <button class="btn light sm" onclick="out()">Sign out</button>
+</div>
+<main id="main" style="display:none"></main>
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ---------------------------------------------------------------
+   ENTRIX vendor console. Sign in with an account whose UID exists
+   as a document in the `admins` collection (create that by hand in
+   the Firebase console — the app can never write to it).
+   --------------------------------------------------------------- */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCLhZ6t6w4XemLPrHGHdpX_Ar-89aZAbPk",
+  authDomain: "gp-admin-cloud.firebaseapp.com",
+  projectId: "gp-admin-cloud",
+  storageBucket: "gp-admin-cloud.firebasestorage.app",
+  messagingSenderId: "851530921508",
+  appId: "1:851530921508:web:e5245360e512a5a9be0ab1"
+};
+const PRICE_YEAR = 6000;   // ₹ per panchayat per year — used only for the revenue estimate
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth=firebase.auth(), fdb=firebase.firestore();
+const TSfrom=d=>firebase.firestore.Timestamp.fromDate(d);
+
+let ROWS=[], q='', filter='';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dmy=d=>{if(!d)return '—';const p=String(d).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;};
+const iso=d=>d.toISOString().slice(0,10);
+const inr=n=>'₹'+(Number(n)||0).toLocaleString('en-IN');
+function toast(m,bad){const t=$('#toast');t.textContent=m;t.className='on'+(bad?' bad':'');
+  clearTimeout(t._h);t._h=setTimeout(()=>{t.className='';},2600);}
+
+const expOf=r=>r.expiresAt&&r.expiresAt.toDate?r.expiresAt.toDate():null;
+const daysOf=r=>{const e=expOf(r);return e?Math.ceil((e-new Date())/86400000):0;};
+function stateOf(r){
+  const d=daysOf(r);
+  if(r.status==='suspended') return {k:'suspended',cls:'p-dead',label:'Suspended'};
+  if(d<=0) return {k:'expired',cls:'p-dead',label:'Expired'};
+  if(r.status==='trial') return {k:'trial',cls:'p-trial',label:'Trial · '+d+'d'};
+  return {k:'active',cls:'p-active',label:'Active · '+d+'d'};
+}
+
+async function signIn(){
+  $('#err').textContent='Signing in…';
+  try{ await auth.signInWithEmailAndPassword($('#e').value.trim(),$('#p').value); }
+  catch(err){ $('#err').textContent='Incorrect email or password.'; }
+}
+async function out(){ await auth.signOut(); }
+
+auth.onAuthStateChanged(async function(u){
+  if(!u){ $('#login').style.display='grid'; $('#bar').style.display='none'; $('#main').style.display='none'; return; }
+  try{
+    const a=await fdb.collection('admins').doc(u.uid).get();
+    if(!a.exists) throw new Error('This account is not an ENTRIX admin.');
+    $('#login').style.display='none'; $('#bar').style.display='flex'; $('#main').style.display='block';
+    await load();
+  }catch(e){
+    await auth.signOut();
+    $('#err').textContent=e.message||'Not authorised.';
+  }
+});
+
+async function load(){
+  $('#main').innerHTML='<div class="sheet"><div class="empty">Loading…</div></div>';
+  try{
+    const s=await fdb.collection('panchayats').get();
+    ROWS=s.docs.map(d=>Object.assign({gpId:d.id},d.data()));
+    ROWS.sort((a,b)=>(expOf(a)||0)-(expOf(b)||0));
+    render();
+  }catch(e){ $('#main').innerHTML='<div class="sheet"><div class="empty">Could not load: '+esc(e.message)+'</div></div>'; }
+}
+
+function render(){
+  const list=ROWS.filter(function(r){
+    const hay=(r.name+' '+r.taluka+' '+r.district+' '+r.gpId+' '+(r.gramsevak||'')+' '+(r.mobile||'')).toLowerCase();
+    if(q&&hay.indexOf(q.toLowerCase())<0) return false;
+    return !filter||stateOf(r).k===filter;
+  });
+  const n=k=>ROWS.filter(r=>stateOf(r).k===k).length;
+  const active=n('active');
+  const expiringSoon=ROWS.filter(function(r){const st=stateOf(r);return st.k==='active'&&daysOf(r)<=30;}).length;
+
+  const rows=list.map(function(r){
+    const st=stateOf(r), e=expOf(r);
+    return '<tr>'+
+      '<td><strong class="mr">'+esc(r.name)+'</strong><div class="sub mr">ता. '+esc(r.taluka||'—')+', जि. '+esc(r.district||'—')+'</div></td>'+
+      '<td class="num sub">'+esc(r.gpId)+'</td>'+
+      '<td class="mr">'+esc(r.gramsevak||'—')+'<div class="sub num">'+esc(r.mobile||'')+'</div></td>'+
+      '<td><span class="pill '+st.cls+'">'+st.label+'</span></td>'+
+      '<td class="num">'+(e?dmy(iso(e)):'—')+'</td>'+
+      '<td class="rowacts">'+
+        '<button class="btn amber sm" onclick="activate(\''+r.gpId+'\',12)">+1 yr</button>'+
+        '<button class="btn ghost sm" onclick="activate(\''+r.gpId+'\',6)">+6 mo</button>'+
+        '<button class="btn ghost sm" onclick="extendTrial(\''+r.gpId+'\')">+15 d trial</button>'+
+        (r.status==='suspended'
+          ? '<button class="btn ghost sm" onclick="setStatus(\''+r.gpId+'\',\'active\')">Unsuspend</button>'
+          : '<button class="btn danger sm" onclick="setStatus(\''+r.gpId+'\',\'suspended\')">Suspend</button>')+
+      '</td></tr>';
+  }).join('');
+
+  $('#main').innerHTML=
+    '<div class="stats">'+
+      '<div class="stat accent"><div class="k">Paying</div><div class="v">'+active+'</div>'+
+        '<div class="n">'+inr(active*PRICE_YEAR)+' / year est.</div></div>'+
+      '<div class="stat accent"><div class="k">On trial</div><div class="v">'+n('trial')+'</div>'+
+        '<div class="n">conversion opportunities</div></div>'+
+      '<div class="stat"><div class="k">Renew within 30 d</div><div class="v">'+expiringSoon+'</div>'+
+        '<div class="n">call these first</div></div>'+
+      '<div class="stat"><div class="k">Expired</div><div class="v">'+n('expired')+'</div></div>'+
+      '<div class="stat"><div class="k">Suspended</div><div class="v">'+n('suspended')+'</div></div>'+
+      '<div class="stat"><div class="k">Total signed up</div><div class="v">'+ROWS.length+'</div></div>'+
+    '</div>'+
+    '<div class="toolbar">'+
+      '<input class="search" id="q" placeholder="Search village, taluka, code, Gram Sevak…" value="'+esc(q)+'" '+
+        'oninput="q=this.value;render();refocus()">'+
+      '<select onchange="filter=this.value;render()">'+
+        ['','trial','active','expired','suspended'].map(k=>'<option value="'+k+'" '+(filter===k?'selected':'')+'>'+
+          (k===''?'All':k[0].toUpperCase()+k.slice(1))+'</option>').join('')+
+      '</select>'+
+      '<span class="sub" style="margin-left:auto">'+list.length+' of '+ROWS.length+'</span>'+
+    '</div>'+
+    '<div class="sheet"><div class="sheetwrap"><table>'+
+      '<thead><tr><th>Panchayat</th><th>Code</th><th>Gram Sevak</th><th>Status</th><th>Valid until</th><th>Actions</th></tr></thead>'+
+      '<tbody>'+(rows||'<tr><td colspan="6" class="empty">No panchayats match.</td></tr>')+'</tbody>'+
+    '</table></div></div>'+
+    '<div class="note"><strong>Sorted by expiry, soonest first</strong> — the top of this list is your call sheet. '+
+      '"+1 yr" sets the plan to active and the expiry to one year from today (or from the current expiry, whichever is later, '+
+      'so an early renewal never loses days). Suspending blocks new entries immediately but never deletes anything.</div>';
+}
+function refocus(){setTimeout(function(){const e=$('#q');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length);}},0);}
+
+/* ---------- actions ---------- */
+function baseFor(r){
+  const e=expOf(r), now=new Date();
+  return (e && e>now) ? e : now;      // early renewal keeps the unused days
+}
+async function activate(gpId,months){
+  const r=ROWS.filter(x=>x.gpId===gpId)[0]; if(!r) return;
+  const from=baseFor(r), to=new Date(from);
+  to.setMonth(to.getMonth()+months);
+  if(!confirm(r.name+'\n\nSet to ACTIVE until '+dmy(iso(to))+'?')) return;
+  try{
+    await fdb.collection('panchayats').doc(gpId).update({
+      status:'active', plan:months===12?'annual':'half-yearly',
+      expiresAt:TSfrom(to), lastRenewedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    toast(r.name+' active until '+dmy(iso(to)));
+    await load();
+  }catch(e){ toast('Could not update: '+(e.message||''),true); }
+}
+async function extendTrial(gpId){
+  const r=ROWS.filter(x=>x.gpId===gpId)[0]; if(!r) return;
+  const to=new Date(baseFor(r).getTime()+15*86400000);
+  if(!confirm(r.name+'\n\nExtend the TRIAL to '+dmy(iso(to))+'?')) return;
+  try{
+    await fdb.collection('panchayats').doc(gpId).update({status:'trial',plan:'trial',expiresAt:TSfrom(to)});
+    toast('Trial extended to '+dmy(iso(to)));
+    await load();
+  }catch(e){ toast('Could not update: '+(e.message||''),true); }
+}
+async function setStatus(gpId,status){
+  const r=ROWS.filter(x=>x.gpId===gpId)[0]; if(!r) return;
+  const warn=status==='suspended'
+    ? r.name+'\n\nSuspend? New entries stop immediately. Existing records stay readable and are never deleted.'
+    : r.name+'\n\nRestore access?';
+  if(!confirm(warn)) return;
+  try{
+    await fdb.collection('panchayats').doc(gpId).update({status:status});
+    toast(status==='suspended'?'Suspended.':'Access restored.');
+    await load();
+  }catch(e){ toast('Could not update: '+(e.message||''),true); }
+}
+function exportCSV(){
+  const H=['Code','Panchayat','Taluka','District','Gram Sevak','Mobile','Status','Plan','Valid until','Days left'];
+  const Q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const body=ROWS.map(function(r){const e=expOf(r);
+    return [r.gpId,r.name,r.taluka,r.district,r.gramsevak,r.mobile,stateOf(r).k,r.plan,e?iso(e):'',daysOf(r)].map(Q).join(',');});
+  const csv='﻿'+[H.map(Q).join(',')].concat(body).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='panchayat-subscriptions-'+iso(new Date())+'.csv'; a.click(); URL.revokeObjectURL(a.href);
+  toast('CSV downloaded.');
+}
+
+if(FIREBASE_CONFIG.apiKey==='PASTE_API_KEY'){
+  document.getElementById('err').textContent='Paste your Firebase config into this file first.';
+}
+</script>
+</body>
+</html>

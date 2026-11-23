@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ग्रामपंचायत प्रशासन प्रणाली</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Serif+Devanagari:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A1F44; --ink-2:#12305F; --amber:#F2A900; --paper:#EAEEF4; --card:#FFF;
+  --rule:#C2CDDD; --rule-soft:#E1E7F0; --muted:#5A6B85; --muted-2:#7C8CA5;
+  --ok:#0F7B4F; --warn:#8A5A00; --bad:#A8231C;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans','Noto Sans Devanagari',system-ui,sans-serif;
+  --dev:'Noto Sans Devanagari',sans-serif;
+  --devserif:'Noto Serif Devanagari','Noto Sans Devanagari',serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:13.5px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+a{color:var(--ink-2)}
+
+.seal{width:44px;height:44px;border-radius:50%;flex:none;border:2px solid var(--amber);display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 35%,rgba(242,169,0,.22),transparent 70%);position:relative}
+.seal::after{content:'';position:absolute;inset:4px;border:1px solid rgba(242,169,0,.5);border-radius:50%}
+.seal span{font-family:var(--devserif);font-weight:700;font-size:15px;color:var(--amber);line-height:1;z-index:1}
+
+#gate{position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,#0A1F44,#071634);
+  display:grid;place-items:start center;padding:26px 18px;overflow-y:auto}
+#gate .panel{width:100%;max-width:430px}
+#gate .crest{display:flex;gap:14px;align-items:center;margin-bottom:20px}
+#gate .crest .t1{font-family:var(--devserif);font-size:19px;font-weight:700;color:#fff;line-height:1.25}
+#gate .crest .t2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-top:5px}
+#gate .box{background:#fff;border-radius:8px;padding:20px;box-shadow:0 28px 60px -20px rgba(0,0,0,.6)}
+.tabs{display:flex;border-bottom:1px solid var(--rule);margin:-20px -20px 18px;padding:0 6px;background:#F8FAFD;border-radius:8px 8px 0 0}
+.tab{flex:1;background:none;border:0;border-bottom:3px solid transparent;padding:12px 6px;cursor:pointer;
+  font-family:var(--dev);font-size:13px;font-weight:600;color:var(--muted)}
+.tab.on{color:var(--ink);border-bottom-color:var(--amber);background:#fff}
+.tab small{display:block;font-family:var(--sans);font-size:10px;font-weight:400;color:var(--muted-2)}
+#gate h2{margin:0 0 3px;font-family:var(--dev);font-size:15.5px;font-weight:600}
+#gate .lede{margin:0 0 16px;font-size:12px;color:var(--muted)}
+#gate footer{margin-top:16px;font-size:11px;color:#8FA2BE;text-align:center;line-height:1.6}
+#gate footer b{color:var(--amber)}
+.err{color:var(--bad);font-size:12px;min-height:17px;margin-top:7px}
+.trialbadge{background:#FFF9EC;border:1px solid #E4D5AC;color:#6B5000;border-radius:5px;padding:9px 12px;font-size:12px;margin-bottom:15px}
+.trialbadge b{font-family:var(--dev)}
+
+.app{display:none;grid-template-columns:240px 1fr;min-height:100vh}
+.app.on{display:grid}
+.side{background:var(--ink);color:#fff;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.side .top{padding:15px;border-bottom:1px solid rgba(255,255,255,.13);display:flex;gap:11px;align-items:center}
+.side .top .t1{font-family:var(--devserif);font-size:14.5px;font-weight:700;line-height:1.25}
+.side .top .t2{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-top:4px}
+.office{padding:11px 15px;border-bottom:1px solid rgba(255,255,255,.13);font-size:11.5px;color:#A9BAD2}
+.office strong{display:block;font-family:var(--dev);font-size:13px;color:#fff;font-weight:600;margin-bottom:2px}
+.office .fy{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--amber);margin-top:5px}
+nav{flex:1;overflow-y:auto;padding:6px 0}
+.navgroup{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#6E82A2;padding:12px 15px 5px}
+.navitem{display:grid;grid-template-columns:44px 1fr;align-items:center;width:100%;text-align:left;background:none;border:0;
+  cursor:pointer;padding:7px 12px 7px 0;color:#C3D0E3;border-left:3px solid transparent}
+.navitem:hover{background:rgba(255,255,255,.055);color:#fff}
+.navitem.on{background:rgba(242,169,0,.13);border-left-color:var(--amber);color:#fff}
+.namuna{font-family:var(--mono);font-size:8.5px;font-weight:600;text-align:center;color:var(--amber);opacity:.8}
+.navitem.on .namuna{opacity:1}
+.navlabel{font-family:var(--dev);font-size:13px;font-weight:500;line-height:1.25}
+.navlabel span{display:block;font-family:var(--sans);font-size:10.5px;color:#8DA1BE;font-weight:400}
+.navitem.on .navlabel span{color:#C3D0E3}
+.side .bot{padding:10px 15px;border-top:1px solid rgba(255,255,255,.13);font-size:11px;color:#9BAECA}
+.side .bot .who{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.side .bot .who i{width:26px;height:26px;border-radius:50%;background:var(--amber);color:#2A1D00;display:grid;place-items:center;
+  font-style:normal;font-weight:700;font-size:11px;flex:none}
+.side .bot .who b{display:block;color:#fff;font-family:var(--dev);font-size:12px;font-weight:600}
+.linkbtn{background:none;border:0;color:#9BAECA;cursor:pointer;padding:0;font-size:11px;text-decoration:underline;text-underline-offset:2px}
+.linkbtn:hover{color:#fff}
+
+.topbar{background:#fff;border-bottom:1px solid var(--rule);padding:0 22px;min-height:46px;display:flex;align-items:center;
+  justify-content:space-between;gap:16px;position:sticky;top:0;z-index:20}
+.crumb{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2)}
+.crumb b{color:var(--ink);font-weight:600}
+.topmeta{font-family:var(--mono);font-size:10.5px;color:var(--muted);display:flex;gap:14px;align-items:center}
+.syncdot{display:inline-flex;align-items:center;gap:5px;font-size:10px}
+.syncdot i{width:7px;height:7px;border-radius:50%;background:var(--ok);display:block}
+.syncdot.off i{background:var(--muted-2)}
+.syncdot.err i{background:var(--bad)}
+
+.ribbon{padding:8px 22px;font-size:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid}
+.ribbon.trial{background:#FFF9EC;border-color:#E4D5AC;color:#6B5000}
+.ribbon.warn{background:#FDF1EC;border-color:#E8C8B6;color:#7A3A12}
+.ribbon.dead{background:#FDF3F2;border-color:#E6C6C3;color:#7A1A15}
+.ribbon b{font-family:var(--dev)}
+.ribbon .grow{margin-left:auto}
+
+main{padding:0 22px 56px;max-width:1300px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px 0 14px}
+h1{font-family:var(--dev);font-size:20px;margin:0;font-weight:600;line-height:1.25}
+h1 span{display:block;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--muted);margin-top:2px}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+
+.btn{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:4px;padding:6.5px 13px;font-size:12.5px;
+  font-weight:500;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block}
+.btn:hover{background:var(--ink-2)}
+.btn.ghost{background:#fff;color:var(--ink);border-color:var(--rule)}
+.btn.ghost:hover{background:#F2F6FB;border-color:var(--ink)}
+.btn.amber{background:var(--amber);border-color:#D69600;color:#2A1D00;font-weight:600}
+.btn.amber:hover{filter:brightness(1.05)}
+.btn.sm{padding:3.5px 8px;font-size:11.5px}
+.btn.danger{background:#fff;color:var(--bad);border-color:#E3C2BF}
+.btn.danger:hover{background:#FCF3F2}
+.btn.wide{width:100%;padding:9px;text-align:center}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:11px}
+.search{flex:1;min-width:180px;max-width:330px;padding:6.5px 11px;border:1px solid var(--rule);border-radius:4px;background:#fff}
+select.filter{padding:6.5px 9px;border:1px solid var(--rule);border-radius:4px;background:#fff}
+.count{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto}
+
+.sheet{background:var(--card);border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+.sheethead{padding:9px 14px;border-bottom:1px solid var(--rule);background:#F4F7FB;display:flex;justify-content:space-between;
+  align-items:center;gap:12px;flex-wrap:wrap}
+.sheethead .t{font-family:var(--dev);font-size:13px;font-weight:600}
+.sheethead .t em{font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-left:9px}
+.sheetwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:660px}
+th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  font-weight:600;padding:8px 11px;background:#F8FAFD;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule-soft);white-space:nowrap}
+th:last-child{border-right:0}
+td{padding:8px 11px;border-bottom:1px solid var(--rule-soft);border-right:1px solid var(--rule-soft);vertical-align:top}
+td:last-child{border-right:0}
+tbody tr:nth-child(even){background:#FBFCFE}
+tbody tr:hover{background:#F2F7FD}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{background:#F4F7FB;border-top:2px solid var(--rule);font-weight:600;border-bottom:0}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.regno{font-family:var(--mono);font-weight:600;font-size:11.5px}
+.mr{font-family:var(--dev)}
+.sub{color:var(--muted);font-size:11.5px}
+.right{text-align:right}
+.rowacts{display:flex;gap:5px;white-space:nowrap}
+.pill{display:inline-block;padding:1.5px 8px;border-radius:16px;font-size:10.5px;font-weight:600;border:1px solid;white-space:nowrap}
+.p-open{color:var(--bad);border-color:#E6C6C3;background:#FDF4F3}
+.p-prog{color:var(--warn);border-color:#E4D5AC;background:#FFFAEE}
+.p-done{color:var(--ok);border-color:#BADCC9;background:#F1F9F5}
+.p-neutral{color:var(--muted);border-color:var(--rule);background:#F5F8FC}
+.empty{padding:46px 24px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-family:var(--dev);font-size:14.5px;margin-bottom:5px;font-weight:600}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--rule);border-radius:5px;padding:12px 13px}
+.stat .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat .k em{font-style:normal;font-family:var(--dev);letter-spacing:0;text-transform:none;font-size:11px;display:block;margin-top:1px}
+.stat .v{font-family:var(--mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:6px}
+.stat .n{font-size:11px;color:var(--muted);margin-top:1px}
+.stat.accent{border-left:3px solid var(--amber)}
+.bar{height:5px;background:var(--rule-soft);border-radius:3px;overflow:hidden;margin-top:6px;min-width:80px}
+.bar i{display:block;height:100%;background:var(--amber)}
+.bar.good i{background:var(--ok)}
+.bar.bad i{background:var(--bad)}
+
+.scrim{position:fixed;inset:0;background:rgba(7,22,52,.5);display:none;align-items:flex-start;justify-content:center;
+  padding:26px 15px;z-index:60;overflow-y:auto}
+.scrim.on{display:flex}
+.modal{background:#fff;border-radius:7px;width:100%;max-width:680px;box-shadow:0 30px 70px -14px rgba(7,22,52,.55)}
+.modal header{padding:14px 19px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;
+  gap:12px;background:#F8FAFD;border-radius:7px 7px 0 0}
+.modal header h2{margin:0;font-family:var(--dev);font-size:15.5px;font-weight:600}
+.modal header .x{background:none;border:0;font-size:21px;line-height:1;cursor:pointer;color:var(--muted);padding:0 4px}
+.modal .body{padding:17px 19px}
+.modal footer{padding:13px 19px;border-top:1px solid var(--rule);display:flex;justify-content:flex-end;gap:7px;background:#F8FAFD;
+  border-radius:0 0 7px 7px;flex-wrap:wrap}
+.modal footer .spacer{margin-right:auto}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px 13px}
+.field{display:flex;flex-direction:column;gap:3px}
+.field.full{grid-column:1/-1}
+label{font-family:var(--dev);font-size:12px;font-weight:600;color:var(--ink)}
+label em{font-style:normal;font-family:var(--sans);font-weight:400;color:var(--muted);font-size:11px}
+label .req{color:var(--bad);margin-left:2px}
+input,select,textarea{padding:6.5px 10px;border:1px solid var(--rule);border-radius:4px;background:#fff;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+input.bad{border-color:var(--bad);background:#FEF8F8}
+input:disabled,select:disabled,textarea:disabled{background:#F4F6FA;color:var(--muted)}
+textarea{resize:vertical;min-height:62px}
+.hint{font-size:11px;color:var(--muted)}
+fieldset{border:1px solid var(--rule-soft);border-radius:5px;padding:12px 14px;margin:0 0 13px}
+legend{font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);padding:0 6px}
+.notice{border-left:3px solid var(--amber);background:#FFFBF2;padding:10px 13px;border-radius:0 4px 4px 0;font-size:12px;
+  color:#5C4A22;margin-top:13px;max-width:78ch}
+
+#printArea{display:none}
+.doc{font-family:'IBM Plex Sans','Noto Sans Devanagari',sans-serif;color:#000}
+.doc .lh{text-align:center;border-bottom:2.5px solid #000;padding-bottom:11px;margin-bottom:6px;position:relative}
+.doc .lh .l1{font-family:var(--devserif);font-size:20px;font-weight:700}
+.doc .lh .l2{font-size:12.5px;margin-top:3px}
+.doc .lh .l3{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;margin-top:6px;color:#333}
+.doc .lh .pseal{position:absolute;left:0;top:0;width:52px;height:52px;border:2px solid #000;border-radius:50%;display:grid;
+  place-items:center;font-family:var(--devserif);font-weight:700;font-size:16px}
+.doc .meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:#444;border-bottom:1px solid #000;
+  padding-bottom:5px;margin-bottom:16px}
+.doc h3{text-align:center;font-family:var(--devserif);font-size:16px;margin:14px 0 5px;font-weight:700}
+.doc h3 small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;font-weight:500;margin-top:4px;color:#333}
+.doc .rule{height:1px;background:#000;width:130px;margin:0 auto 16px}
+.doc table{width:100%;min-width:0;border-collapse:collapse;margin-bottom:12px}
+.doc td,.doc th{border:1px solid #000;padding:6px 9px;font-size:12px;vertical-align:top}
+.doc th{background:#e8e8e8;font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;text-align:left}
+.doc td.k{width:35%;background:#f3f3f3;font-family:var(--dev);font-weight:600}
+.doc .sign{display:flex;justify-content:space-between;align-items:flex-end;margin-top:56px;font-size:12px}
+.doc .sign .box{text-align:center}
+.doc .sign .sealbox{width:96px;height:96px;border:1px dashed #666;border-radius:50%;display:grid;place-items:center;font-size:9px;color:#777;margin:0 auto}
+.doc .sign .line{border-top:1px solid #000;padding-top:5px;min-width:180px;font-family:var(--dev);font-weight:600}
+.doc .sign .line small{display:block;font-family:var(--sans);font-weight:400;color:#444;font-size:10.5px}
+.doc .foot{margin-top:24px;font-size:9.5px;color:#444;border-top:1px solid #999;padding-top:7px;display:flex;justify-content:space-between;gap:14px}
+@media print{
+  body{background:#fff}
+  .app,#gate,.scrim,.splash{display:none!important}
+  #printArea{display:block!important}
+  @page{size:A4 portrait;margin:14mm}
+  @page landscape{size:A4 landscape}
+  .land{page:landscape}
+}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,14px);opacity:0;pointer-events:none;background:var(--ink);
+  color:#fff;padding:9px 17px;border-radius:4px;font-size:12.5px;box-shadow:0 8px 26px -8px rgba(7,22,52,.6);transition:.18s;z-index:90;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast.bad{background:var(--bad)}
+.thumb{width:42px;height:42px;object-fit:cover;border-radius:3px;border:1px solid var(--rule);display:block;cursor:zoom-in}
+.splash{position:fixed;inset:0;z-index:120;background:#0A1F44;color:#fff;display:grid;place-items:center;font-family:var(--dev);font-size:14px;padding:20px;text-align:center}
+
+@media (max-width:900px){
+  .app.on{grid-template-columns:1fr}
+  .side{position:static;height:auto}
+  nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1px;padding:6px}
+  .navgroup{grid-column:1/-1;padding:8px 8px 2px}
+  .navitem{border-left:0;border-bottom:3px solid transparent;padding:7px 5px}
+  .navitem.on{border-left:0;border-bottom-color:var(--amber)}
+  main{padding:0 13px 46px}
+  .topbar{padding:7px 13px;flex-wrap:wrap;gap:6px}
+  .ribbon{padding:8px 13px}
+  .grid2{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">प्रणाली सुरू होत आहे…</div>
+
+<div id="gate" style="display:none">
+  <div class="panel">
+    <div class="crest">
+      <div class="seal"><span>ग्रा</span></div>
+      <div>
+        <div class="t1">ग्रामपंचायत प्रशासन प्रणाली</div>
+        <div class="t2">Panchayat Administration System</div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="tabs">
+        <button class="tab on" id="tabLogin" onclick="showTab('login')">प्रवेश<small>Sign in</small></button>
+        <button class="tab" id="tabReg" onclick="showTab('reg')">नवीन नोंदणी<small>Register</small></button>
+      </div>
+      <div id="gateBody"></div>
+      <div class="err" id="gateErr"></div>
+    </div>
+    <footer>
+      <b>१५ दिवस मोफत चाचणी</b> — नोंदणी करा आणि लगेच वापरा.<br>
+      15-day free trial · No card needed · ENTRIX Innovation, Nagpur
+    </footer>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <aside class="side">
+    <div class="top">
+      <div class="seal"><span>ग्रा</span></div>
+      <div><div class="t1">ग्रामपंचायत</div><div class="t2">Admin System</div></div>
+    </div>
+    <div class="office" id="officeBox"></div>
+    <nav id="nav"></nav>
+    <div class="bot">
+      <div class="who" id="whoBox"></div>
+      <button class="linkbtn" onclick="logout()">बाहेर पडा · Sign out</button>
+    </div>
+  </aside>
+  <div>
+    <div class="topbar">
+      <div class="crumb" id="crumb"></div>
+      <div class="topmeta">
+        <span class="syncdot" id="syncDot"><i></i><span id="syncTxt">Synced</span></span>
+        <span id="tbDate"></span>
+        <button class="btn ghost sm" onclick="openSettings()">Settings</button>
+      </div>
+    </div>
+    <div id="ribbon"></div>
+    <main>
+      <div class="head"><h1 id="pageTitle"></h1><div class="actions" id="pageActions"></div></div>
+      <div id="view"></div>
+    </main>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()">
+  <div class="modal" role="dialog" aria-modal="true">
+    <header><h2 id="modalTitle"></h2><button class="x" onclick="closeModal()" aria-label="Close">&times;</button></header>
+    <div class="body" id="modalBody"></div>
+    <footer id="modalFoot"></footer>
+  </div>
+</div>
+
+<div id="printArea"></div>
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* =====================================================================
+   ग्रामपंचायत प्रशासन प्रणाली — multi-tenant SaaS build
+   ENTRIX Innovation, Nagpur
+
+   One Firebase project serves every Gram Panchayat. Each panchayat is a
+   tenant: panchayats/{gpId} holds its licence, and every register lives
+   under it. The 15-day trial is enforced by Firestore security rules,
+   not by this file — see firestore.rules.
+   ===================================================================== */
+
+/* ---- 1. PASTE YOUR FIREBASE CONFIG HERE ---- */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCLhZ6t6w4XemLPrHGHdpX_Ar-89aZAbPk",
+  authDomain: "gp-admin-cloud.firebaseapp.com",
+  projectId: "gp-admin-cloud",
+  storageBucket: "gp-admin-cloud.firebasestorage.app",
+  messagingSenderId: "851530921508",
+  appId: "1:851530921508:web:e5245360e512a5a9be0ab1"
+};
+
+/* ---- 2. Vendor settings ---- */
+const TRIAL_DAYS = 15;
+const VENDOR = {
+  name:'ENTRIX Innovation',
+  phone:'+91 95525 52667',
+  email:'sales01@entrix.co.in',
+  site:'entrix.co.in'
+};
+const MAIL_DOMAIN = 'gpadmin.app';   // usernames become <user>@gpadmin.app
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const fdb  = firebase.firestore();
+fdb.enablePersistence({synchronizeTabs:true}).catch(function(){});
+const FV = firebase.firestore.FieldValue;
+
+/* ---------------- Roles ---------------- */
+const ROLES = {
+  gramsevak:{ mr:'ग्रामसेवक', en:'Gram Sevak — Secretary', can:['view','edit','delete','settings','collect','staff'] },
+  operator :{ mr:'लिपिक / संगणक चालक', en:'Operator — data entry', can:['view','edit','collect'] },
+  sarpanch :{ mr:'सरपंच', en:'Sarpanch — view and reports', can:['view'] }
+};
+
+/* ---------------- State ---------------- */
+let USER=null, TENANT=null, GPID=null, DB=null;
+let page='dash', q='', filter='';
+/* Firebase fires onAuthStateChanged the moment an account is created — before
+   the panchayat and user documents exist. Without this flag the listener would
+   find no linked panchayat and sign the brand-new customer straight back out. */
+let REGISTERING=false;
+
+const blankDB=()=>({
+  citizens:[],properties:[],births:[],deaths:[],receipts:[],
+  complaints:[],sabha:[],schemes:[],works:[],docs:[],audit:[],
+  seq:{birth:1,death:1,receipt:1,complaint:1,prop:1}
+});
+
+/* ---------------- Utils ---------------- */
+const $=s=>document.querySelector(s);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr=n=>'₹'+(Number(n)||0).toLocaleString('en-IN');
+const dmy=d=>{if(!d)return '—';const p=String(d).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;};
+const today=()=>new Date().toISOString().slice(0,10);
+const sum=(a,f)=>a.reduce((t,x)=>t+(Number(f(x))||0),0);
+const ageFrom=dob=>{if(!dob)return '';const b=new Date(dob),n=new Date();let a=n.getFullYear()-b.getFullYear();
+  if(n<new Date(n.getFullYear(),b.getMonth(),b.getDate()))a--;return a>=0?a:'';};
+const val=id=>{const e=$('#'+id);return e?e.value.trim():'';};
+function flagBad(id){const e=$('#'+id);if(e){e.classList.add('bad');e.focus();setTimeout(()=>e.classList.remove('bad'),2200);}}
+function toast(m,bad){const t=$('#toast');t.textContent=m;t.className='on'+(bad?' bad':'');
+  clearTimeout(t._h);t._h=setTimeout(()=>{t.className='';},2800);}
+function setSync(state,txt){const d=$('#syncDot');if(!d)return;d.className='syncdot'+(state?' '+state:'');$('#syncTxt').textContent=txt;}
+
+/* ---------------- Licence ---------------- */
+function expiryDate(){ return TENANT && TENANT.expiresAt && TENANT.expiresAt.toDate ? TENANT.expiresAt.toDate() : null; }
+function daysLeft(){ const e=expiryDate(); return e ? Math.ceil((e-new Date())/86400000) : 0; }
+function licenceOk(){ return !!TENANT && ['trial','active'].indexOf(TENANT.status)>-1 && daysLeft()>0; }
+const can=p=>!!USER && ROLES[USER.role].can.indexOf(p)>-1 && (p==='view'||licenceOk());
+function guard(p){
+  if(!licenceOk()){ showExpired(); return false; }
+  if(!can(p)){ toast('आपल्या पदाला ही कृती करता येत नाही.',true); return false; }
+  return true;
+}
+const waLink=txt=>'https://wa.me/'+VENDOR.phone.replace(/\D/g,'')+'?text='+encodeURIComponent(txt);
+
+function renderRibbon(){
+  const r=$('#ribbon'); if(!TENANT){r.innerHTML='';return;}
+  const d=daysLeft(), st=TENANT.status, ed=expiryDate();
+  const edTxt=ed?dmy(ed.toISOString().slice(0,10)):'—';
+  if(st==='suspended'||d<=0){
+    r.innerHTML='<div class="ribbon dead"><b>मुदत संपली — नोंदी फक्त वाचता येतील.</b>'+
+      '<span>Subscription expired. Your data is safe, but new entries are blocked.</span>'+
+      '<span class="grow"></span><button class="btn amber sm" onclick="showExpired()">नूतनीकरण · Renew</button></div>';
+  } else if(st==='trial'){
+    r.innerHTML='<div class="ribbon '+(d<=4?'warn':'trial')+'"><b>मोफत चाचणी — '+d+' दिवस शिल्लक</b>'+
+      '<span>Free trial · expires '+edTxt+'</span>'+
+      '<span class="grow"></span><button class="btn amber sm" onclick="showExpired()">सदस्यत्व घ्या · Subscribe</button></div>';
+  } else if(d<=20){
+    r.innerHTML='<div class="ribbon warn"><b>सदस्यत्व '+d+' दिवसांत संपेल</b>'+
+      '<span>Subscription ends '+edTxt+'</span>'+
+      '<span class="grow"></span><button class="btn amber sm" onclick="showExpired()">नूतनीकरण · Renew</button></div>';
+  } else r.innerHTML='';
+}
+function showExpired(){
+  const d=daysLeft(), dead=!licenceOk();
+  const msgMr = dead
+    ? 'आपल्या ग्रामपंचायतीची मुदत संपली आहे. सर्व जुन्या नोंदी सुरक्षित आहेत व वाचता येतील, परंतु नवीन नोंदी करता येणार नाहीत.'
+    : 'आपली मोफत चाचणी <strong>'+d+' दिवसांत</strong> संपेल. पूर्ण वापरासाठी सदस्यत्व घ्या.';
+  const msgEn = dead
+    ? 'Your records remain safe and readable. New entries resume the moment the subscription is activated — nothing is re-entered.'
+    : 'Subscribe to keep using the system without interruption.';
+  modal(dead?'सदस्यत्व नूतनीकरण आवश्यक':'सदस्यत्व घ्या · Subscribe',
+   '<p class="mr" style="margin-top:0;font-size:13.5px">'+msgMr+'</p>'+
+   '<p class="hint" style="margin-top:-4px">'+msgEn+'</p>'+
+   '<fieldset style="margin-top:14px"><legend>संपर्क · Contact</legend><div class="grid2">'+
+     '<div><label>'+esc(VENDOR.name)+'</label><div class="sub">Nagpur, Maharashtra</div></div>'+
+     '<div><label>दूरध्वनी · Phone</label><div class="num">'+esc(VENDOR.phone)+'</div></div>'+
+     '<div><label>ईमेल · Email</label><div class="num">'+esc(VENDOR.email)+'</div></div>'+
+     '<div><label>संकेतस्थळ</label><div class="num">'+esc(VENDOR.site)+'</div></div></div>'+
+     '<div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap">'+
+       '<a class="btn amber" target="_blank" rel="noopener" href="'+waLink('ग्रामपंचायत प्रशासन प्रणाली — सदस्यत्वाबाबत चौकशी. कोड: '+(GPID||''))+'">WhatsApp</a>'+
+       '<a class="btn ghost" href="tel:'+VENDOR.phone.replace(/\s/g,'')+'">कॉल करा · Call</a>'+
+     '</div></fieldset>'+
+   '<div class="notice">आपला ग्रामपंचायत कोड: <strong class="num">'+esc(GPID||'—')+'</strong> — नूतनीकरणासाठी हा क्रमांक सांगा.<br>'+
+     '<span style="color:#7A6636">Quote this code when you renew.</span></div>',
+   '<button class="btn ghost" onclick="exportData()">बॅकअप घ्या · Backup</button>'+
+   '<button class="btn" onclick="closeModal()">बंद</button>');
+}
+
+/* ---------------- Firestore data layer ---------------- */
+const gpRef=()=>fdb.collection('panchayats').doc(GPID);
+
+async function loadAll(){
+  DB=blankDB();
+  setSync('off','Loading…');
+  const snap=await gpRef().collection('data').get();
+  snap.forEach(function(doc){
+    const v=doc.data();
+    if(doc.id==='meta') DB.seq=Object.assign(DB.seq,v.seq||{});
+    else if(Array.isArray(v.rows)) DB[doc.id]=v.rows;
+  });
+  const cs=await gpRef().collection('complaints').orderBy('date','desc').limit(500).get();
+  DB.complaints=cs.docs.map(d=>Object.assign({id:d.id},d.data()));
+  const au=await gpRef().collection('audit').orderBy('ts','desc').limit(300).get();
+  DB.audit=au.docs.map(d=>Object.assign({id:d.id},d.data()));
+  setSync('','Synced');
+}
+async function saveModule(name){
+  try{
+    setSync('off','Saving…');
+    if(name==='meta') await gpRef().collection('data').doc('meta').set({seq:DB.seq,updatedAt:FV.serverTimestamp()});
+    else await gpRef().collection('data').doc(name).set({rows:DB[name],updatedAt:FV.serverTimestamp()});
+    setSync('','Synced');
+    return true;
+  }catch(e){
+    setSync('err','Not saved');
+    if(e.code==='permission-denied'){ showExpired(); toast('मुदत संपल्याने नोंद जतन झाली नाही.',true); }
+    else toast('जतन झाले नाही — '+(e.message||'error'),true);
+    return false;
+  }
+}
+async function saveComplaintDoc(rec){
+  try{
+    setSync('off','Saving…');
+    const body=Object.assign({},rec); delete body.id;
+    await gpRef().collection('complaints').doc(rec.id).set(body);
+    setSync('','Synced'); return true;
+  }catch(e){
+    setSync('err','Not saved');
+    if(e.code==='permission-denied'){ showExpired(); } else toast('जतन झाले नाही.',true);
+    return false;
+  }
+}
+async function logAudit(action,module,ref){
+  const rec={ts:new Date().toISOString(),user:(USER&&USER.name)||'—',
+    role:USER?ROLES[USER.role].mr:'—',action:action,module:module,ref:ref||''};
+  DB.audit.unshift(Object.assign({id:uid()},rec));
+  try{ await gpRef().collection('audit').add(rec); }catch(e){}
+}
+
+/* =====================================================================
+   GATE
+   ===================================================================== */
+function showTab(t){
+  $('#tabLogin').classList.toggle('on',t==='login');
+  $('#tabReg').classList.toggle('on',t==='reg');
+  $('#gateErr').textContent='';
+  $('#gateBody').innerHTML = t==='login' ? loginForm() : regForm();
+  const f=$('#gateBody').querySelector('input'); if(f) setTimeout(()=>f.focus(),60);
+}
+const loginForm=()=>
+  '<h2>कार्यालयात प्रवेश</h2>'+
+  '<p class="lede">Sign in with the username your panchayat was given.</p>'+
+  '<div class="grid2">'+
+    '<div class="field full"><label>वापरकर्ता नाव <em>· Username</em></label>'+
+      '<input id="l_user" autocomplete="username" onkeydown="if(event.key===\'Enter\')doLogin()"></div>'+
+    '<div class="field full"><label>पासवर्ड <em>· Password</em></label>'+
+      '<input type="password" id="l_pass" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doLogin()"></div>'+
+  '</div>'+
+  '<button class="btn amber wide" style="margin-top:14px" onclick="doLogin()">प्रवेश करा · Sign in</button>';
+
+const regForm=()=>
+  '<h2>नवीन ग्रामपंचायत नोंदणी</h2>'+
+  '<p class="lede">Register your panchayat and start a '+TRIAL_DAYS+'-day free trial.</p>'+
+  '<div class="trialbadge"><b>'+TRIAL_DAYS+' दिवस मोफत</b> — कोणतेही कार्ड नको. चाचणीनंतर सदस्यत्व घ्यायचे की नाही हे आपण ठरवा.</div>'+
+  '<fieldset><legend>ग्रामपंचायत · Panchayat</legend><div class="grid2">'+
+    '<div class="field full"><label>ग्रामपंचायतीचे नाव<span class="req">*</span></label><input id="r_name" class="mr"></div>'+
+    '<div class="field"><label>तालुका<span class="req">*</span></label><input id="r_tal" class="mr"></div>'+
+    '<div class="field"><label>जिल्हा<span class="req">*</span></label><input id="r_dist" class="mr"></div>'+
+    '<div class="field"><label>सरपंच</label><input id="r_sar" class="mr"></div>'+
+    '<div class="field"><label>ग्रामसेवक<span class="req">*</span></label><input id="r_gs" class="mr"></div>'+
+    '<div class="field"><label>मोबाइल<span class="req">*</span></label><input id="r_mob" inputmode="numeric" maxlength="10"></div>'+
+    '<div class="field"><label>प्रभाग संख्या</label><input type="number" id="r_wards" value="5" min="1" max="30"></div>'+
+  '</div></fieldset>'+
+  '<fieldset><legend>प्रशासक लॉगिन · Admin login</legend><div class="grid2">'+
+    '<div class="field"><label>वापरकर्ता नाव<span class="req">*</span></label><input id="r_user" autocomplete="off" placeholder="gp_shivani"></div>'+
+    '<div class="field"><label>पासवर्ड<span class="req">*</span></label><input type="password" id="r_pass" autocomplete="new-password"></div>'+
+  '</div><p class="hint" style="margin-top:6px">इंग्रजी अक्षरे व अंक वापरा, जागा नको. Password at least 6 characters.</p></fieldset>'+
+  '<button class="btn amber wide" onclick="doRegister()">नोंदणी करा व सुरू करा</button>';
+
+const emailFor=u=>u.toLowerCase().replace(/[^a-z0-9_.-]/g,'')+'@'+MAIL_DOMAIN;
+
+async function doLogin(){
+  const u=val('l_user'), p=$('#l_pass').value;
+  if(!u||!p){ $('#gateErr').textContent='वापरकर्ता नाव व पासवर्ड भरा.'; return; }
+  $('#gateErr').textContent='प्रवेश होत आहे…';
+  try{ await auth.signInWithEmailAndPassword(emailFor(u),p); }
+  catch(e){
+    const badCred=['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'];
+    $('#gateErr').textContent = badCred.indexOf(e.code)>-1
+      ? 'चुकीचे वापरकर्ता नाव किंवा पासवर्ड · Incorrect username or password.'
+      : 'प्रवेश अयशस्वी — '+(e.message||'');
+  }
+}
+
+async function doRegister(){
+  const name=val('r_name'), tal=val('r_tal'), dist=val('r_dist'), gs=val('r_gs'),
+        mob=val('r_mob'), user=val('r_user'), pass=$('#r_pass').value,
+        nw=Math.max(1,Math.min(30,Number(val('r_wards'))||5));
+  const fail=(id,msg)=>{flagBad(id);$('#gateErr').textContent=msg;};
+  if(!name) return fail('r_name','ग्रामपंचायतीचे नाव आवश्यक.');
+  if(!tal)  return fail('r_tal','तालुका आवश्यक.');
+  if(!dist) return fail('r_dist','जिल्हा आवश्यक.');
+  if(!gs)   return fail('r_gs','ग्रामसेवकाचे नाव आवश्यक.');
+  if(!/^\d{10}$/.test(mob)) return fail('r_mob','१० अंकी मोबाइल क्रमांक भरा.');
+  if(!/^[a-zA-Z0-9_.-]{4,}$/.test(user)) return fail('r_user','वापरकर्ता नाव किमान ४ अक्षरे, इंग्रजीत, जागा नको.');
+  if(pass.length<6) return fail('r_pass','पासवर्ड किमान ६ अक्षरे.');
+
+  $('#gateErr').textContent='नोंदणी सुरू आहे…';
+  let cred=null;
+  REGISTERING=true;
+  try{
+    cred=await auth.createUserWithEmailAndPassword(emailFor(user),pass);
+    const newUid=cred.user.uid;
+    const gpId=(dist.slice(0,2)+tal.slice(0,2)).replace(/\s/g,'')+'-'+Date.now().toString(36).slice(-6).toUpperCase();
+    const exp=new Date(Date.now()+TRIAL_DAYS*86400000);
+    const wardsArr=[]; for(let i=1;i<=nw;i++) wardsArr.push(String(i));
+
+    await fdb.collection('panchayats').doc(gpId).set({
+      name:name,taluka:tal,district:dist,state:'महाराष्ट्र',
+      sarpanch:val('r_sar'),gramsevak:gs,mobile:mob,
+      wards:wardsArr,fy:'2026-27',code:'',
+      ownerUid:newUid,plan:'trial',status:'trial',
+      expiresAt:firebase.firestore.Timestamp.fromDate(exp),
+      createdAt:FV.serverTimestamp()
+    });
+    await fdb.collection('users').doc(newUid).set({
+      gpId:gpId,role:'gramsevak',name:gs,username:user,active:true,createdAt:FV.serverTimestamp()
+    });
+    REGISTERING=false;
+    toast('नोंदणी पूर्ण — '+TRIAL_DAYS+' दिवसांची चाचणी सुरू.');
+    await enterOffice(cred.user);       // records exist now, so open the office
+  }catch(e){
+    REGISTERING=false;
+    if(cred){ try{ await cred.user.delete(); }catch(_){} }
+    $('#gateErr').textContent = e.code==='auth/email-already-in-use'
+      ? 'हे वापरकर्ता नाव आधीच वापरात आहे. दुसरे निवडा.'
+      : 'नोंदणी अयशस्वी — '+(e.message||'');
+  }
+}
+
+/* ---------------- Auth lifecycle ---------------- */
+auth.onAuthStateChanged(async function(u){
+  if(REGISTERING) return;              // doRegister opens the office itself
+  if(!u){
+    USER=null;TENANT=null;GPID=null;
+    $('#app').classList.remove('on'); $('#splash').style.display='none';
+    $('#gate').style.display='grid'; showTab('login'); return;
+  }
+  await enterOffice(u);
+});
+async function enterOffice(u){
+  try{
+    $('#splash').style.display='grid'; $('#splash').textContent='माहिती उघडत आहे…';
+    const ud=await fdb.collection('users').doc(u.uid).get();
+    if(!ud.exists) throw new Error('या लॉगिनशी कोणतीही ग्रामपंचायत जोडलेली नाही.');
+    const d=ud.data();
+    if(d.active===false) throw new Error('या लॉगिनचा प्रवेश बंद करण्यात आला आहे.');
+    USER={uid:u.uid,role:d.role||'operator',name:d.name||d.username,gpId:d.gpId};
+    GPID=d.gpId;
+    const td=await fdb.collection('panchayats').doc(GPID).get();
+    if(!td.exists) throw new Error('ग्रामपंचायत नोंद सापडली नाही.');
+    TENANT=td.data();
+    await loadAll();
+    $('#gate').style.display='none'; $('#splash').style.display='none';
+    $('#app').classList.add('on');
+    renderNav(); go('dash');
+    logAudit('प्रवेश','कार्यालय','');
+    if(!licenceOk()) setTimeout(showExpired,600);
+  }catch(e){
+    $('#splash').style.display='none';
+    await auth.signOut();
+    $('#gate').style.display='grid'; showTab('login');
+    $('#gateErr').textContent=e.message||'प्रवेश अयशस्वी.';
+  }
+}
+async function logout(){ try{ await logAudit('बाहेर पडले','कार्यालय',''); }catch(e){} await auth.signOut(); }
+
+/* =====================================================================
+   Navigation
+   ===================================================================== */
+const MODULES=[
+  {id:'dash',g:'सारांश',tag:'—',mr:'कार्यालय सारांश',en:'Office summary'},
+  {id:'citizens',g:'नोंदवह्या',tag:'—',mr:'नागरिक नोंदणी',en:'Citizen records'},
+  {id:'properties',g:'नोंदवह्या',tag:'न.८',mr:'मालमत्ता नोंदवही',en:'Property register'},
+  {id:'tax',g:'नोंदवह्या',tag:'न.९/१०',mr:'कर वसुली',en:'Tax collection'},
+  {id:'births',g:'नोंदवह्या',tag:'—',mr:'जन्म नोंदवही',en:'Birth register'},
+  {id:'deaths',g:'नोंदवह्या',tag:'—',mr:'मृत्यू नोंदवही',en:'Death register'},
+  {id:'complaints',g:'कामकाज',tag:'—',mr:'तक्रार निवारण',en:'Complaints'},
+  {id:'sabha',g:'कामकाज',tag:'—',mr:'ग्रामसभा',en:'Gram Sabha'},
+  {id:'schemes',g:'कामकाज',tag:'—',mr:'योजना लाभार्थी',en:'Scheme beneficiaries'},
+  {id:'works',g:'कामकाज',tag:'—',mr:'विकास कामे',en:'Development works'},
+  {id:'docs',g:'कामकाज',tag:'—',mr:'दस्तऐवज नोंद',en:'Document index'},
+  {id:'reports',g:'अहवाल',tag:'—',mr:'अहवाल',en:'Reports'},
+  {id:'audit',g:'अहवाल',tag:'—',mr:'नोंद तपशील',en:'Audit trail'},
+  {id:'staff',g:'व्यवस्थापन',tag:'—',mr:'वापरकर्ते',en:'Staff logins'},
+  {id:'account',g:'व्यवस्थापन',tag:'—',mr:'सदस्यत्व',en:'Subscription'}
+];
+function renderNav(){
+  let h='',last='';
+  MODULES.forEach(function(m){
+    if(m.id==='staff' && USER.role!=='gramsevak') return;
+    if(m.g!==last){h+='<div class="navgroup">'+m.g+'</div>';last=m.g;}
+    h+='<button class="navitem '+(m.id===page?'on':'')+'" onclick="go(\''+m.id+'\')">'+
+       '<span class="namuna">'+m.tag+'</span>'+
+       '<span class="navlabel">'+m.mr+'<span>'+m.en+'</span></span></button>';
+  });
+  $('#nav').innerHTML=h;
+  const g=TENANT;
+  $('#officeBox').innerHTML='<strong>'+esc(g.name)+'</strong>'+
+    esc(['ता. '+(g.taluka||''),'जि. '+(g.district||'')].join(', '))+
+    '<div class="fy">FY '+esc(g.fy||'2026-27')+' · '+esc(GPID)+'</div>';
+  $('#whoBox').innerHTML='<i>'+esc((USER.name||'?').trim()[0]||'?')+'</i>'+
+    '<div><b>'+esc(USER.name)+'</b>'+esc(ROLES[USER.role].mr)+'</div>';
+  $('#tbDate').textContent=dmy(today());
+}
+function go(id){page=id;q='';filter='';renderNav();render();window.scrollTo(0,0);}
+
+/* ---------------- Modal ---------------- */
+function modal(t,b,f){
+  $('#modalTitle').innerHTML=t;$('#modalBody').innerHTML=b;
+  $('#modalFoot').innerHTML=f||'<button class="btn ghost" onclick="closeModal()">बंद करा · Close</button>';
+  $('#scrim').classList.add('on');
+  const x=$('#modalBody').querySelector('input,select,textarea');if(x)setTimeout(()=>x.focus(),50);
+}
+function closeModal(){$('#scrim').classList.remove('on');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+
+/* ---------------- Shared ---------------- */
+const wards=()=>TENANT.wards||['1'];
+const wardOpts=sel=>wards().map(w=>'<option '+(w===sel?'selected':'')+'>'+esc(w)+'</option>').join('');
+const citizenOpts=sel=>'<option value="">— जोडलेले नाही —</option>'+
+  DB.citizens.map(c=>'<option value="'+c.id+'" '+(c.id===sel?'selected':'')+'>'+esc(c.name)+' ('+esc(c.houseNo||'—')+')</option>').join('');
+function toolbar(ph,f,n){
+  return '<div class="toolbar"><input class="search" id="q" placeholder="'+ph+'" value="'+esc(q)+'" '+
+    'oninput="q=this.value;renderBody();refocus()">'+(f||'')+(n!=null?'<span class="count">'+n+' नोंदी</span>':'')+'</div>';
+}
+function refocus(){setTimeout(function(){const e=$('#q');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length);}},0);}
+const match=(o,f)=>!q||f.some(k=>String(o[k]==null?'':o[k]).toLowerCase().indexOf(q.toLowerCase())>-1);
+function sheet(o){
+  const head=o.title?'<div class="sheethead"><div class="t">'+o.title+(o.tag?'<em>'+o.tag+'</em>':'')+'</div>'+
+    '<div class="rowacts">'+(o.exportId?'<button class="btn ghost sm" onclick="exportCSV(\''+o.exportId+'\')">CSV</button>'+
+      '<button class="btn ghost sm" onclick="printRegister(\''+o.exportId+'\')">छापा</button>':'')+'</div></div>':'';
+  if(!o.rows.length) return '<div class="sheet">'+head+'<div class="empty"><strong>'+o.emptyTitle+'</strong>'+(o.emptyNote||'')+'</div></div>';
+  return '<div class="sheet">'+head+'<div class="sheetwrap"><table><thead><tr>'+
+    o.cols.map(c=>'<th'+(c.r?' class="right"':'')+'>'+c.t+'</th>').join('')+'</tr></thead><tbody>'+
+    o.rows.join('')+'</tbody>'+(o.foot?'<tfoot>'+o.foot+'</tfoot>':'')+'</table></div></div>';
+}
+const addBtn=(fn,mr,en)=>can('edit')?'<button class="btn amber" onclick="'+fn+'">'+mr+' <span style="opacity:.65;font-weight:500">· '+en+'</span></button>':'';
+
+function render(){
+  const m=MODULES.filter(x=>x.id===page)[0];
+  $('#crumb').innerHTML=esc(m.g)+' <span style="opacity:.4">/</span> <b>'+esc(m.en)+'</b>'+
+    (m.tag!=='—'?' <span style="opacity:.55">· नमुना '+esc(m.tag.replace('न.',''))+'</span>':'');
+  $('#pageTitle').innerHTML=m.mr+'<span>'+m.en+'</span>';
+  $('#pageActions').innerHTML=typeof PAGES[page].actions==='function'?PAGES[page].actions():(PAGES[page].actions||'');
+  renderBody(); renderRibbon();
+}
+function renderBody(){$('#view').innerHTML=PAGES[page].body();}
+const PAGES={};
+
+/* ---------- Constants ---------- */
+const SEXES=['पुरुष','स्त्री','इतर'];
+const PTYPES=['निवासी','व्यापारी','मिश्र','मोकळी जागा','संस्थात्मक'];
+const TAX_HEADS=[['house','घरपट्टी','House tax'],['water','पाणीपट्टी','Water tax'],['health','आरोग्य कर','Health tax'],['light','दिवाबत्ती कर','Light tax']];
+const CATS=['पथदिवा','पाणीपुरवठा','रस्ता','गटार','कचरा संकलन','स्वच्छता','अतिक्रमण','इतर'];
+const CSTAT=['प्रलंबित','कार्यवाही सुरू','निवारण झाले'];
+const SCHEMES=['प्रधानमंत्री आवास योजना (ग्रामीण)','पी.एम. किसान सन्मान निधी','संजय गांधी निराधार योजना','श्रावणबाळ योजना','उज्ज्वला योजना','मनरेगा जॉब कार्ड','रमाई आवास योजना','इतर'];
+const SSTAT=['अर्ज केला','पडताळणी','मंजूर','नामंजूर'];
+const WSTAT=['सुरू झालेले नाही','प्रगतीपथावर','पूर्ण'];
+const DCATS=['परिपत्रक','शासन निर्णय','लेखापरीक्षण','निविदा','पत्रव्यवहार','नमुना अर्ज','इतर'];
+
+const demandFor=p=>{const t={};let s=0;TAX_HEADS.forEach(function(h){t[h[0]]=Number(p[h[0]])||0;s+=t[h[0]];});
+  t.arrears=Number(p.arrears)||0;s+=t.arrears;t.total=s;return t;};
+const paidFor=pid=>DB.receipts.filter(r=>r.propId===pid&&r.fy===TENANT.fy)[0];
+
+/* ---------- Dashboard ---------- */
+PAGES.dash={actions:()=>'<button class="btn ghost" onclick="printDaily()">दैनिक अहवाल · Day report</button>',
+  body:function(){
+    const demand=sum(DB.properties,p=>demandFor(p).total);
+    const coll=sum(DB.receipts.filter(r=>r.fy===TENANT.fy),r=>r.total);
+    const pct=demand?Math.round(coll/demand*100):0;
+    return '<div class="stats">'+
+      '<div class="stat accent"><div class="k">Demand <em>मागणी</em></div><div class="v">'+inr(demand)+'</div>'+
+        '<div class="n">'+DB.properties.length+' मालमत्ता</div></div>'+
+      '<div class="stat accent"><div class="k">Collected <em>वसुली</em></div><div class="v">'+inr(coll)+'</div>'+
+        '<div class="bar '+(pct>=70?'good':pct<30?'bad':'')+'"><i style="width:'+Math.min(100,pct)+'%"></i></div><div class="n">'+pct+'%</div></div>'+
+      '<div class="stat"><div class="k">Outstanding <em>थकबाकी</em></div><div class="v">'+inr(demand-coll)+'</div></div>'+
+      '<div class="stat"><div class="k">Citizens <em>नागरिक</em></div><div class="v">'+DB.citizens.length+'</div>'+
+        '<div class="n">'+wards().length+' प्रभाग</div></div>'+
+      '<div class="stat"><div class="k">Open complaints <em>प्रलंबित</em></div>'+
+        '<div class="v">'+DB.complaints.filter(c=>c.status!==CSTAT[2]).length+'</div><div class="n">'+DB.complaints.length+' एकूण</div></div>'+
+      '<div class="stat"><div class="k">Works ongoing <em>चालू कामे</em></div>'+
+        '<div class="v">'+DB.works.filter(w=>w.status===WSTAT[1]).length+'</div><div class="n">'+DB.works.length+' मंजूर</div></div>'+
+    '</div>'+
+    '<div class="sheet"><div class="sheethead"><div class="t">आजची प्रलंबित कामे<em>Needs attention</em></div></div>'+
+      '<div style="padding:4px 15px 12px">'+attention()+'</div></div>';
+  }};
+function attention(){
+  const it=[];
+  DB.complaints.filter(c=>c.status===CSTAT[0]).slice(0,5).forEach(c=>
+    it.push('<span class="pill p-open">प्रलंबित</span> तक्रार <span class="regno">'+esc(c.token)+'</span> — '+esc(c.category)+', प्रभाग '+esc(c.ward)+' <span class="sub">· '+dmy(c.date)+'</span>'));
+  DB.properties.filter(p=>demandFor(p).total>0&&!paidFor(p.id)).slice(0,5).forEach(p=>
+    it.push('<span class="pill p-prog">थकीत</span> मालमत्ता <span class="regno">'+esc(p.propNo)+'</span> — '+esc(p.owner)+' <span class="sub">· '+inr(demandFor(p).total)+'</span>'));
+  DB.works.filter(w=>w.status===WSTAT[1]).slice(0,4).forEach(w=>
+    it.push('<span class="pill p-prog">'+(w.progress||0)+'%</span> '+esc(w.name)+' <span class="sub">· लक्ष्य '+dmy(w.target)+'</span>'));
+  if(!it.length) return '<div class="sub" style="padding:12px 0">काहीही प्रलंबित नाही.</div>';
+  return it.map(i=>'<div style="padding:8px 0;border-bottom:1px solid var(--rule-soft)">'+i+'</div>').join('');
+}
+
+/* ---------- Citizens ---------- */
+PAGES.citizens={actions:()=>addBtn('editCitizen()','नागरिक नोंदवा','Add citizen'),
+  body:function(){
+    const L=DB.citizens.filter(c=>match(c,['name','houseNo','mobile','occupation'])).filter(c=>!filter||c.ward===filter);
+    const rows=L.map(function(c,i){return '<tr><td class="num sub">'+(i+1)+'</td>'+
+      '<td><strong class="mr">'+esc(c.name)+'</strong>'+(c.head?' <span class="pill p-neutral">कुटुंबप्रमुख</span>':'')+
+        '<div class="sub mr">'+esc(c.occupation||'')+'</div></td>'+
+      '<td class="num">'+esc(c.houseNo||'—')+'</td><td class="num">'+esc(c.ward)+'</td>'+
+      '<td class="mr">'+esc(c.gender||'—')+'</td><td class="num right">'+(ageFrom(c.dob)||'—')+'</td>'+
+      '<td class="num">'+esc(c.mobile||'—')+'</td>'+
+      '<td><div class="rowacts">'+(can('edit')?'<button class="btn ghost sm" onclick="editCitizen(\''+c.id+'\')">दुरुस्ती</button>':'')+
+        (can('delete')?'<button class="btn danger sm" onclick="del(\'citizens\',\''+c.id+'\')">×</button>':'')+'</div></td></tr>';});
+    return toolbar('नाव, घर क्र., मोबाइल शोधा…',
+      '<select class="filter" onchange="filter=this.value;renderBody()"><option value="">सर्व प्रभाग</option>'+
+        wards().map(w=>'<option '+(filter===w?'selected':'')+'>'+esc(w)+'</option>').join('')+'</select>',L.length)
+      +sheet({title:'नागरिक नोंदवही',tag:'Citizen register',exportId:'citizens',
+        cols:[{t:'अ.क्र.'},{t:'नाव / Name'},{t:'घर क्र.'},{t:'प्रभाग'},{t:'लिंग'},{t:'वय',r:1},{t:'मोबाइल'},{t:''}],
+        rows:rows,emptyTitle:'नोंदवही रिकामी आहे',emptyNote:'Add the first household to begin.'});
+  }};
+function editCitizen(id){
+  if(!guard('edit'))return;
+  const c=DB.citizens.filter(x=>x.id===id)[0]||{ward:wards()[0]};
+  modal(id?'नागरिक दुरुस्ती':'नागरिक नोंदणी','<div class="grid2">'+
+    '<div class="field full"><label>पूर्ण नाव<span class="req">*</span></label><input id="c_name" class="mr" value="'+esc(c.name||'')+'"></div>'+
+    '<div class="field"><label>घर क्रमांक</label><input id="c_house" value="'+esc(c.houseNo||'')+'"></div>'+
+    '<div class="field"><label>प्रभाग</label><select id="c_ward">'+wardOpts(c.ward)+'</select></div>'+
+    '<div class="field"><label>लिंग</label><select id="c_gender">'+SEXES.map(g=>'<option '+(g===c.gender?'selected':'')+'>'+g+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>जन्म दिनांक</label><input type="date" id="c_dob" value="'+esc(c.dob||'')+'"></div>'+
+    '<div class="field"><label>मोबाइल</label><input id="c_mob" inputmode="numeric" maxlength="10" value="'+esc(c.mobile||'')+'"></div>'+
+    '<div class="field"><label>व्यवसाय</label><input id="c_occ" class="mr" value="'+esc(c.occupation||'')+'"></div>'+
+    '<div class="field full"><label style="font-weight:500"><input type="checkbox" id="c_head" style="width:auto;margin-right:7px" '+(c.head?'checked':'')+'>कुटुंबप्रमुख</label></div></div>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn" onclick="saveCitizen(\''+(id||'')+'\')">जतन करा</button>');
+}
+async function saveCitizen(id){
+  const name=val('c_name'); if(!name){flagBad('c_name');return toast('नाव आवश्यक आहे.',true);}
+  const mob=val('c_mob'); if(mob&&!/^\d{10}$/.test(mob)){flagBad('c_mob');return toast('१० अंकी मोबाइल भरा.',true);}
+  const rec={id:id||uid(),name:name,houseNo:val('c_house'),ward:val('c_ward'),gender:val('c_gender'),dob:val('c_dob'),
+    mobile:mob,occupation:val('c_occ'),head:$('#c_head').checked};
+  const i=DB.citizens.findIndex(x=>x.id===id);
+  if(i>-1) DB.citizens[i]=rec; else DB.citizens.push(rec);
+  if(await saveModule('citizens')){logAudit(id?'दुरुस्ती':'नवीन नोंद','नागरिक',name);closeModal();renderBody();toast('नोंद जतन झाली.');}
+}
+
+/* ---------- Properties ---------- */
+PAGES.properties={actions:()=>addBtn('editProperty()','मालमत्ता नोंदवा','Add property'),
+  body:function(){
+    const L=DB.properties.filter(p=>match(p,['propNo','owner','description'])).filter(p=>!filter||p.ward===filter);
+    const rows=L.map(function(p){const d=demandFor(p),r=paidFor(p.id);
+      return '<tr><td class="regno">'+esc(p.propNo)+'</td>'+
+      '<td><strong class="mr">'+esc(p.owner)+'</strong><div class="sub mr">'+esc(p.description||'')+'</div></td>'+
+      '<td class="num">'+esc(p.ward)+'</td><td class="mr">'+esc(p.type||'—')+'</td>'+
+      '<td class="num right">'+(p.area?esc(p.area):'—')+'</td><td class="num right">'+inr(d.total)+'</td>'+
+      '<td>'+(r?'<span class="pill p-done">वसूल</span>':'<span class="pill p-open">थकीत</span>')+'</td>'+
+      '<td><div class="rowacts">'+(can('edit')?'<button class="btn ghost sm" onclick="editProperty(\''+p.id+'\')">दुरुस्ती</button>':'')+
+        (can('delete')?'<button class="btn danger sm" onclick="del(\'properties\',\''+p.id+'\')">×</button>':'')+'</div></td></tr>';});
+    const foot=rows.length?'<tr><td colspan="5" class="right">एकूण मागणी</td><td class="num right">'+inr(sum(L,p=>demandFor(p).total))+'</td><td colspan="2"></td></tr>':'';
+    return toolbar('मालमत्ता क्र. किंवा मालक शोधा…',
+      '<select class="filter" onchange="filter=this.value;renderBody()"><option value="">सर्व प्रभाग</option>'+
+        wards().map(w=>'<option '+(filter===w?'selected':'')+'>'+esc(w)+'</option>').join('')+'</select>',L.length)
+      +sheet({title:'मालमत्ता नोंदवही',tag:'नमुना ८ · Property register',exportId:'properties',
+        cols:[{t:'मालमत्ता क्र.'},{t:'मालक / Owner'},{t:'प्रभाग'},{t:'प्रकार'},{t:'क्षेत्र',r:1},{t:'एकूण मागणी',r:1},{t:'स्थिती'},{t:''}],
+        rows:rows,foot:foot,emptyTitle:'आकारणी नोंदवही रिकामी',emptyNote:'Add assessed properties to raise the annual demand.'});
+  }};
+function editProperty(id){
+  if(!guard('edit'))return;
+  const p=DB.properties.filter(x=>x.id===id)[0]||{ward:wards()[0]};
+  modal(id?'मालमत्ता दुरुस्ती':'मालमत्ता नोंदणी',
+   '<fieldset><legend>आकारणी · Assessment</legend><div class="grid2">'+
+      '<div class="field"><label>मालमत्ता क्रमांक<span class="req">*</span></label><input id="p_no" value="'+esc(p.propNo||('MP-'+String(DB.seq.prop).padStart(4,'0')))+'"></div>'+
+      '<div class="field"><label>प्रभाग</label><select id="p_ward">'+wardOpts(p.ward)+'</select></div>'+
+      '<div class="field full"><label>मालकाचे नाव<span class="req">*</span></label><input id="p_owner" class="mr" value="'+esc(p.owner||'')+'"></div>'+
+      '<div class="field"><label>नागरिक नोंद</label><select id="p_cit">'+citizenOpts(p.citizenId)+'</select></div>'+
+      '<div class="field"><label>प्रकार</label><select id="p_type">'+PTYPES.map(t=>'<option '+(t===p.type?'selected':'')+'>'+t+'</option>').join('')+'</select></div>'+
+      '<div class="field"><label>क्षेत्रफळ (चौ.मी.)</label><input type="number" id="p_area" value="'+esc(p.area||'')+'"></div>'+
+      /* id is p_waterconn, NOT p_water — p_water is the water-tax input below */
+      '<div class="field"><label>नळ जोडणी</label><select id="p_waterconn">'+['नाही','आहे'].map(t=>'<option '+(t===p.waterConn?'selected':'')+'>'+t+'</option>').join('')+'</select></div>'+
+      '<div class="field full"><label>वर्णन / चतुःसीमा</label><input id="p_desc" class="mr" value="'+esc(p.description||'')+'"></div></div></fieldset>'+
+    '<fieldset><legend>वार्षिक मागणी '+esc(TENANT.fy)+'</legend><div class="grid2">'+
+      TAX_HEADS.map(h=>'<div class="field"><label>'+h[1]+' <em>· '+h[2]+'</em></label><input type="number" id="p_'+h[0]+'" value="'+esc(p[h[0]]||0)+'"></div>').join('')+
+      '<div class="field"><label>मागील थकबाकी</label><input type="number" id="p_arr" value="'+esc(p.arrears||0)+'"></div></div></fieldset>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn" onclick="saveProperty(\''+(id||'')+'\')">जतन करा</button>');
+}
+async function saveProperty(id){
+  const no=val('p_no'),owner=val('p_owner');
+  if(!no){flagBad('p_no');return toast('मालमत्ता क्रमांक आवश्यक.',true);}
+  if(!owner){flagBad('p_owner');return toast('मालकाचे नाव आवश्यक.',true);}
+  if(DB.properties.some(x=>x.propNo===no&&x.id!==id)){flagBad('p_no');return toast('हा मालमत्ता क्रमांक आधीच आहे.',true);}
+  const rec={id:id||uid(),propNo:no,owner:owner,citizenId:val('p_cit'),ward:val('p_ward'),type:val('p_type'),
+    area:val('p_area'),waterConn:val('p_waterconn'),description:val('p_desc'),arrears:val('p_arr')};
+  TAX_HEADS.forEach(h=>{rec[h[0]]=val('p_'+h[0]);});
+  const i=DB.properties.findIndex(x=>x.id===id);
+  if(i>-1) DB.properties[i]=rec; else { DB.properties.push(rec); DB.seq.prop++; saveModule('meta'); }
+  if(await saveModule('properties')){logAudit(id?'दुरुस्ती':'नवीन नोंद','मालमत्ता',no);closeModal();renderBody();toast('नोंद जतन झाली.');}
+}
+
+/* ---------- Tax ---------- */
+PAGES.tax={actions:()=>can('collect')?'<button class="btn amber" onclick="collectTax()">वसुली नोंदवा <span style="opacity:.65;font-weight:500">· Record payment</span></button>':'',
+  body:function(){
+    const L=DB.properties.filter(p=>demandFor(p).total>0).filter(p=>match(p,['propNo','owner']))
+      .filter(function(p){const pd=!!paidFor(p.id);return !filter||(filter==='due'&&!pd)||(filter==='paid'&&pd);});
+    const rows=L.map(function(p){const d=demandFor(p),r=paidFor(p.id);
+      return '<tr><td class="regno">'+esc(p.propNo)+'</td>'+
+      '<td><strong class="mr">'+esc(p.owner)+'</strong><div class="sub">प्रभाग '+esc(p.ward)+'</div></td>'+
+      TAX_HEADS.map(h=>'<td class="num right">'+(d[h[0]]?inr(d[h[0]]):'—')+'</td>').join('')+
+      '<td class="num right">'+(d.arrears?inr(d.arrears):'—')+'</td>'+
+      '<td class="num right"><strong>'+inr(d.total)+'</strong></td>'+
+      '<td>'+(r?'<span class="pill p-done">पावती '+esc(r.receiptNo)+'</span>':'<span class="pill p-open">थकीत</span>')+'</td>'+
+      '<td><div class="rowacts">'+(r?'<button class="btn ghost sm" onclick="printReceipt(\''+r.id+'\')">पावती</button>'
+        :(can('collect')?'<button class="btn sm" onclick="collectTax(\''+p.id+'\')">वसुली</button>':''))+'</div></td></tr>';});
+    const demand=sum(DB.properties,p=>demandFor(p).total),coll=sum(DB.receipts.filter(r=>r.fy===TENANT.fy),r=>r.total);
+    const pct=demand?Math.round(coll/demand*100):0;
+    const foot=rows.length?'<tr><td colspan="2" class="right">एकूण</td>'+
+      TAX_HEADS.map(h=>'<td class="num right">'+inr(sum(L,p=>Number(p[h[0]])||0))+'</td>').join('')+
+      '<td class="num right">'+inr(sum(L,p=>Number(p.arrears)||0))+'</td>'+
+      '<td class="num right"><strong>'+inr(sum(L,p=>demandFor(p).total))+'</strong></td><td colspan="2"></td></tr>':'';
+    return '<div class="stats">'+
+        '<div class="stat accent"><div class="k">Demand <em>मागणी</em></div><div class="v">'+inr(demand)+'</div></div>'+
+        '<div class="stat accent"><div class="k">Collected <em>वसुली</em></div><div class="v">'+inr(coll)+'</div>'+
+          '<div class="bar '+(pct>=70?'good':pct<30?'bad':'')+'"><i style="width:'+Math.min(100,pct)+'%"></i></div><div class="n">'+pct+'%</div></div>'+
+        '<div class="stat"><div class="k">Outstanding <em>थकबाकी</em></div><div class="v">'+inr(demand-coll)+'</div></div></div>'
+      +toolbar('मालमत्ता किंवा मालक शोधा…',
+        '<select class="filter" onchange="filter=this.value;renderBody()"><option value="">सर्व</option>'+
+          '<option value="due" '+(filter==='due'?'selected':'')+'>फक्त थकीत</option>'+
+          '<option value="paid" '+(filter==='paid'?'selected':'')+'>फक्त वसूल</option></select>',L.length)
+      +sheet({title:'मागणी व वसुली नोंदवही',tag:'नमुना ९/१०',exportId:'tax',
+        cols:[{t:'मालमत्ता क्र.'},{t:'मालक'}].concat(TAX_HEADS.map(h=>({t:h[1],r:1}))).concat([{t:'थकबाकी',r:1},{t:'एकूण',r:1},{t:'स्थिती'},{t:''}]),
+        rows:rows,foot:foot,emptyTitle:'मागणी नोंदवलेली नाही',emptyNote:'Add properties with tax amounts first.'});
+  }};
+function collectTax(pid){
+  if(!guard('collect'))return;
+  const unpaid=DB.properties.filter(p=>demandFor(p).total>0&&!paidFor(p.id));
+  if(!unpaid.length&&!pid) return toast('सर्व वसुली पूर्ण.');
+  const opts=(pid?DB.properties.filter(p=>p.id===pid):unpaid)
+    .map(p=>'<option value="'+p.id+'">'+esc(p.propNo)+' — '+esc(p.owner)+' ('+inr(demandFor(p).total)+')</option>').join('');
+  modal('कर वसुली नोंद','<div class="grid2">'+
+    '<div class="field full"><label>मालमत्ता</label><select id="t_prop" onchange="showDue()">'+opts+'</select></div>'+
+    '<div class="field full"><div id="t_break" class="hint" style="background:#F5F8FC;border:1px solid var(--rule-soft);border-radius:4px;padding:9px 11px"></div></div>'+
+    '<div class="field"><label>मिळालेली रक्कम<span class="req">*</span></label><input type="number" id="t_amt"></div>'+
+    '<div class="field"><label>प्रकार</label><select id="t_mode">'+['रोख','UPI','धनादेश','बँक हस्तांतरण'].map(m=>'<option>'+m+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>दिनांक</label><input type="date" id="t_date" value="'+today()+'"></div>'+
+    '<div class="field"><label>संदर्भ / UTR क्र.</label><input id="t_ref"></div></div>'+
+    '<div class="notice">पावती क्रमांक अनुक्रमे दिला जातो व नंतर बदलता येत नाही.</div>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn amber" onclick="saveReceipt()">पावती द्या</button>');
+  showDue();
+}
+function showDue(){
+  const p=DB.properties.filter(x=>x.id===val('t_prop'))[0];if(!p)return;
+  const d=demandFor(p);
+  $('#t_break').innerHTML=TAX_HEADS.filter(h=>d[h[0]]).map(h=>h[1]+' '+inr(d[h[0]])).join(' · ')+
+    (d.arrears?' · थकबाकी '+inr(d.arrears):'')+' &nbsp;—&nbsp; <strong>एकूण '+inr(d.total)+'</strong>';
+  $('#t_amt').value=d.total;
+}
+async function saveReceipt(){
+  const p=DB.properties.filter(x=>x.id===val('t_prop'))[0],amt=Number(val('t_amt'));
+  if(!p||!amt){flagBad('t_amt');return toast('रक्कम भरा.',true);}
+  const d=demandFor(p),heads={};
+  TAX_HEADS.forEach(h=>{heads[h[0]]=d[h[0]];});
+  const rec={id:uid(),receiptNo:'R'+String(DB.seq.receipt).padStart(5,'0'),propId:p.id,fy:TENANT.fy,
+    date:val('t_date'),mode:val('t_mode'),ref:val('t_ref'),total:amt,
+    heads:heads,arrears:d.arrears,owner:p.owner,propNo:p.propNo,by:USER.name};
+  DB.receipts.push(rec);DB.seq.receipt++;
+  if(await saveModule('receipts')){
+    saveModule('meta');
+    logAudit('पावती दिली','कर वसुली',rec.receiptNo+' · '+inr(amt));
+    closeModal();renderBody();toast('पावती '+rec.receiptNo+' दिली.');printReceipt(rec.id);
+  }
+}
+
+/* ---------- Births / Deaths ---------- */
+const crsNote=(mr,en)=>'<div class="notice">ही ग्रामपंचायतीची कार्यालयीन नोंदवही आहे. येथून छापलेला उतारा कार्यालयीन उतारा असून, '+
+  'कायदेशीर '+mr+' दाखला ग्रामसेवक (निबंधक) यांच्यामार्फत नागरी नोंदणी प्रणालीतून (CRS) दिला जातो.<br>'+
+  '<span style="color:#7A6636">The statutory '+en+' certificate is issued through the Civil Registration System.</span></div>';
+
+PAGES.births={actions:()=>addBtn('editBirth()','जन्म नोंदवा','Register birth'),
+  body:function(){
+    const L=DB.births.filter(b=>match(b,['regNo','child','father','mother']));
+    const rows=L.map(b=>'<tr><td class="regno">'+esc(b.regNo)+'</td>'+
+      '<td><strong class="mr">'+esc(b.child||'(नाव दिलेले नाही)')+'</strong><div class="sub mr">'+esc(b.sex)+'</div></td>'+
+      '<td class="num">'+dmy(b.dob)+'</td><td class="mr">'+esc(b.father)+'</td><td class="mr">'+esc(b.mother)+'</td>'+
+      '<td class="mr">'+esc(b.place)+'</td><td class="num">'+dmy(b.regDate)+'</td>'+
+      '<td><div class="rowacts"><button class="btn ghost sm" onclick="printCert(\'birth\',\''+b.id+'\')">उतारा</button>'+
+        (can('edit')?'<button class="btn ghost sm" onclick="editBirth(\''+b.id+'\')">दुरुस्ती</button>':'')+'</div></td></tr>');
+    return toolbar('नोंदणी क्र. किंवा नाव शोधा…','',L.length)
+      +sheet({title:'जन्म नोंदवही',tag:'Birth register',exportId:'births',
+        cols:[{t:'नोंदणी क्र.'},{t:'बालक / Child'},{t:'जन्म दिनांक'},{t:'वडील'},{t:'आई'},{t:'ठिकाण'},{t:'नोंद दिनांक'},{t:''}],
+        rows:rows,emptyTitle:'जन्म नोंदवही रिकामी',emptyNote:'Register the first birth to begin.'})
+      +crsNote('जन्म','birth');
+  }};
+PAGES.deaths={actions:()=>addBtn('editDeath()','मृत्यू नोंदवा','Register death'),
+  body:function(){
+    const L=DB.deaths.filter(d=>match(d,['regNo','name','relative']));
+    const rows=L.map(d=>'<tr><td class="regno">'+esc(d.regNo)+'</td>'+
+      '<td><strong class="mr">'+esc(d.name)+'</strong><div class="sub mr">'+esc(d.sex)+'</div></td>'+
+      '<td class="num">'+dmy(d.dod)+'</td><td class="num right">'+esc(d.age||'—')+'</td>'+
+      '<td class="mr">'+esc(d.place)+'</td><td class="mr">'+esc(d.relative||'—')+'</td><td class="num">'+dmy(d.regDate)+'</td>'+
+      '<td><div class="rowacts"><button class="btn ghost sm" onclick="printCert(\'death\',\''+d.id+'\')">उतारा</button>'+
+        (can('edit')?'<button class="btn ghost sm" onclick="editDeath(\''+d.id+'\')">दुरुस्ती</button>':'')+'</div></td></tr>');
+    return toolbar('नोंदणी क्र. किंवा नाव शोधा…','',L.length)
+      +sheet({title:'मृत्यू नोंदवही',tag:'Death register',exportId:'deaths',
+        cols:[{t:'नोंदणी क्र.'},{t:'नाव / Name'},{t:'मृत्यू दिनांक'},{t:'वय',r:1},{t:'ठिकाण'},{t:'माहिती देणारा'},{t:'नोंद दिनांक'},{t:''}],
+        rows:rows,emptyTitle:'मृत्यू नोंदवही रिकामी',emptyNote:'Register the first entry to begin.'})
+      +crsNote('मृत्यू','death');
+  }};
+function editBirth(id){
+  if(!guard('edit'))return;
+  const b=DB.births.filter(x=>x.id===id)[0]||{};
+  modal(id?'जन्म नोंद दुरुस्ती':'जन्म नोंदणी','<div class="grid2">'+
+    '<div class="field"><label>नोंदणी क्रमांक</label><input id="b_no" value="'+esc(b.regNo||('B/'+TENANT.fy+'/'+String(DB.seq.birth).padStart(4,'0')))+'"></div>'+
+    '<div class="field"><label>नोंद दिनांक</label><input type="date" id="b_rdate" value="'+esc(b.regDate||today())+'"></div>'+
+    '<div class="field"><label>बालकाचे नाव</label><input id="b_child" class="mr" value="'+esc(b.child||'')+'"></div>'+
+    '<div class="field"><label>लिंग</label><select id="b_sex">'+SEXES.map(s=>'<option '+(s===b.sex?'selected':'')+'>'+s+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>जन्म दिनांक<span class="req">*</span></label><input type="date" id="b_dob" value="'+esc(b.dob||'')+'"></div>'+
+    '<div class="field"><label>जन्म ठिकाण</label><input id="b_place" class="mr" value="'+esc(b.place||'')+'"></div>'+
+    '<div class="field"><label>वडिलांचे नाव</label><input id="b_father" class="mr" value="'+esc(b.father||'')+'"></div>'+
+    '<div class="field"><label>आईचे नाव</label><input id="b_mother" class="mr" value="'+esc(b.mother||'')+'"></div>'+
+    '<div class="field full"><label>पत्ता</label><input id="b_addr" class="mr" value="'+esc(b.address||'')+'"></div>'+
+    '<div class="field"><label>माहिती देणारा</label><input id="b_inf" class="mr" value="'+esc(b.informant||'')+'"></div>'+
+    '<div class="field"><label>प्रभाग</label><select id="b_ward">'+wardOpts(b.ward)+'</select></div></div>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn" onclick="saveBirth(\''+(id||'')+'\')">जतन करा</button>');
+}
+async function saveBirth(id){
+  if(!val('b_dob')){flagBad('b_dob');return toast('जन्म दिनांक आवश्यक.',true);}
+  const rec={id:id||uid(),regNo:val('b_no'),regDate:val('b_rdate'),child:val('b_child'),sex:val('b_sex'),dob:val('b_dob'),
+    place:val('b_place'),father:val('b_father'),mother:val('b_mother'),address:val('b_addr'),informant:val('b_inf'),ward:val('b_ward')};
+  const i=DB.births.findIndex(x=>x.id===id);
+  if(i>-1) DB.births[i]=rec; else { DB.births.push(rec); DB.seq.birth++; saveModule('meta'); }
+  if(await saveModule('births')){logAudit(id?'दुरुस्ती':'नवीन नोंद','जन्म नोंदवही',rec.regNo);closeModal();renderBody();toast('नोंद जतन झाली.');}
+}
+function editDeath(id){
+  if(!guard('edit'))return;
+  const d=DB.deaths.filter(x=>x.id===id)[0]||{};
+  modal(id?'मृत्यू नोंद दुरुस्ती':'मृत्यू नोंदणी','<div class="grid2">'+
+    '<div class="field"><label>नोंदणी क्रमांक</label><input id="d_no" value="'+esc(d.regNo||('D/'+TENANT.fy+'/'+String(DB.seq.death).padStart(4,'0')))+'"></div>'+
+    '<div class="field"><label>नोंद दिनांक</label><input type="date" id="d_rdate" value="'+esc(d.regDate||today())+'"></div>'+
+    '<div class="field"><label>मृताचे नाव<span class="req">*</span></label><input id="d_name" class="mr" value="'+esc(d.name||'')+'"></div>'+
+    '<div class="field"><label>लिंग</label><select id="d_sex">'+SEXES.map(s=>'<option '+(s===d.sex?'selected':'')+'>'+s+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>मृत्यू दिनांक<span class="req">*</span></label><input type="date" id="d_dod" value="'+esc(d.dod||'')+'"></div>'+
+    '<div class="field"><label>वय</label><input type="number" id="d_age" value="'+esc(d.age||'')+'"></div>'+
+    '<div class="field"><label>मृत्यू ठिकाण</label><input id="d_place" class="mr" value="'+esc(d.place||'')+'"></div>'+
+    '<div class="field"><label>प्रभाग</label><select id="d_ward">'+wardOpts(d.ward)+'</select></div>'+
+    '<div class="field full"><label>पत्ता</label><input id="d_addr" class="mr" value="'+esc(d.address||'')+'"></div>'+
+    '<div class="field full"><label>माहिती देणारा व नाते</label><input id="d_rel" class="mr" value="'+esc(d.relative||'')+'"></div></div>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn" onclick="saveDeath(\''+(id||'')+'\')">जतन करा</button>');
+}
+async function saveDeath(id){
+  if(!val('d_name')){flagBad('d_name');return toast('मृताचे नाव आवश्यक.',true);}
+  if(!val('d_dod')){flagBad('d_dod');return toast('मृत्यू दिनांक आवश्यक.',true);}
+  const rec={id:id||uid(),regNo:val('d_no'),regDate:val('d_rdate'),name:val('d_name'),sex:val('d_sex'),dod:val('d_dod'),
+    age:val('d_age'),place:val('d_place'),ward:val('d_ward'),address:val('d_addr'),relative:val('d_rel')};
+  const i=DB.deaths.findIndex(x=>x.id===id);
+  if(i>-1) DB.deaths[i]=rec; else { DB.deaths.push(rec); DB.seq.death++; saveModule('meta'); }
+  if(await saveModule('deaths')){logAudit(id?'दुरुस्ती':'नवीन नोंद','मृत्यू नोंदवही',rec.regNo);closeModal();renderBody();toast('नोंद जतन झाली.');}
+}
+
+/* ---------- Complaints ---------- */
+PAGES.complaints={actions:()=>addBtn('editComplaint()','तक्रार नोंदवा','Log complaint'),
+  body:function(){
+    const L=DB.complaints.filter(c=>match(c,['token','category','name','description','mobile'])).filter(c=>!filter||c.status===filter);
+    const rows=L.map(c=>'<tr><td class="regno">'+esc(c.token)+'</td>'+
+      '<td>'+(c.photo?'<img class="thumb" src="'+c.photo+'" alt="" onclick="viewPhoto(\''+c.id+'\')">':'<span class="sub">—</span>')+'</td>'+
+      '<td><strong class="mr">'+esc(c.category)+'</strong><div class="sub mr">'+esc((c.description||'').slice(0,52))+'</div></td>'+
+      '<td class="mr">'+esc(c.name||'—')+'<div class="sub num">'+esc(c.mobile||'')+'</div></td>'+
+      '<td class="num">'+esc(c.ward)+'</td>'+
+      '<td class="num">'+(c.lat?'<a href="https://maps.google.com/?q='+c.lat+','+c.lng+'" target="_blank" rel="noopener">'+Number(c.lat).toFixed(4)+', '+Number(c.lng).toFixed(4)+'</a>':'<span class="sub">—</span>')+'</td>'+
+      '<td class="num">'+dmy(c.date)+'</td>'+
+      '<td><span class="pill '+(c.status===CSTAT[2]?'p-done':c.status===CSTAT[1]?'p-prog':'p-open')+'">'+esc(c.status)+'</span></td>'+
+      '<td><div class="rowacts">'+(can('edit')?'<button class="btn ghost sm" onclick="editComplaint(\''+c.id+'\')">कार्यवाही</button>':'')+'</div></td></tr>');
+    return toolbar('तक्रार शोधा…',
+      '<select class="filter" onchange="filter=this.value;renderBody()"><option value="">सर्व स्थिती</option>'+
+        CSTAT.map(s=>'<option '+(filter===s?'selected':'')+'>'+s+'</option>').join('')+'</select>',L.length)
+      +sheet({title:'तक्रार नोंदवही',tag:'Complaint register',exportId:'complaints',
+        cols:[{t:'टोकन'},{t:'छायाचित्र'},{t:'प्रकार'},{t:'तक्रारदार'},{t:'प्रभाग'},{t:'ठिकाण GPS'},{t:'दिनांक'},{t:'स्थिती'},{t:''}],
+        rows:rows,emptyTitle:'तक्रार नोंदवलेली नाही',emptyNote:'Photo and GPS can be captured directly on a phone.'});
+  }};
+function editComplaint(id){
+  if(!guard('edit'))return;
+  const c=DB.complaints.filter(x=>x.id===id)[0]||{ward:wards()[0],status:CSTAT[0]};
+  modal(id?('तक्रार '+esc(c.token)+' — कार्यवाही'):'तक्रार नोंदणी','<div class="grid2">'+
+    '<div class="field"><label>प्रकार</label><select id="x_cat">'+CATS.map(k=>'<option '+(k===c.category?'selected':'')+'>'+k+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>प्रभाग</label><select id="x_ward">'+wardOpts(c.ward)+'</select></div>'+
+    '<div class="field full"><label>तक्रार तपशील<span class="req">*</span></label><textarea id="x_desc" class="mr">'+esc(c.description||'')+'</textarea></div>'+
+    '<div class="field"><label>तक्रारदाराचे नाव</label><input id="x_name" class="mr" value="'+esc(c.name||'')+'"></div>'+
+    '<div class="field"><label>मोबाइल</label><input id="x_mob" inputmode="numeric" maxlength="10" value="'+esc(c.mobile||'')+'"></div>'+
+    '<div class="field full"><label>खूण / ठिकाण</label><input id="x_loc" class="mr" value="'+esc(c.location||'')+'"></div>'+
+    '<div class="field"><label>स्थिती</label><select id="x_status">'+CSTAT.map(s=>'<option '+(s===c.status?'selected':'')+'>'+s+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>निवारण दिनांक</label><input type="date" id="x_rdate" value="'+esc(c.resolvedOn||'')+'"></div>'+
+    '<div class="field full"><label>केलेली कार्यवाही</label><textarea id="x_action" class="mr">'+esc(c.action||'')+'</textarea></div></div>'+
+    '<fieldset style="margin-top:13px"><legend>पुरावा · Evidence</legend><div class="grid2">'+
+      '<div class="field"><label>छायाचित्र</label><input type="file" accept="image/*" capture="environment" onchange="grabPhoto(this)">'+
+        '<div id="x_prev">'+(c.photo?'<img class="thumb" style="width:76px;height:76px;margin-top:7px" src="'+c.photo+'" alt="">':'')+'</div></div>'+
+      '<div class="field"><label>GPS स्थान</label><button type="button" class="btn ghost sm" onclick="grabGPS()">सद्य स्थान घ्या</button>'+
+        '<div id="x_gps" class="hint" style="margin-top:6px">'+(c.lat?c.lat+', '+c.lng:'घेतलेले नाही')+'</div></div></div></fieldset>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn" onclick="saveComplaintRec(\''+(id||'')+'\')">जतन करा</button>');
+  window._photo=c.photo||null;window._gps=c.lat?{lat:c.lat,lng:c.lng}:null;
+}
+function grabPhoto(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=function(e){const img=new Image();
+    img.onload=function(){const max=820,s=Math.min(1,max/Math.max(img.width,img.height));
+      const cv=document.createElement('canvas');cv.width=img.width*s;cv.height=img.height*s;
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      window._photo=cv.toDataURL('image/jpeg',0.62);
+      $('#x_prev').innerHTML='<img class="thumb" style="width:76px;height:76px;margin-top:7px" src="'+window._photo+'" alt="">';};
+    img.onerror=function(){toast('हे चित्र वाचता आले नाही.',true);};
+    img.src=e.target.result;};
+  r.readAsDataURL(f);
+}
+function grabGPS(){
+  if(!navigator.geolocation) return toast('या उपकरणावर स्थान मिळत नाही.',true);
+  $('#x_gps').textContent='स्थान घेत आहे…';
+  navigator.geolocation.getCurrentPosition(
+    function(p){window._gps={lat:p.coords.latitude.toFixed(6),lng:p.coords.longitude.toFixed(6)};
+      $('#x_gps').textContent=window._gps.lat+', '+window._gps.lng;},
+    function(){$('#x_gps').textContent='स्थान मिळाले नाही. खूण नोंदवा.';},
+    {enableHighAccuracy:true,timeout:10000});
+}
+async function saveComplaintRec(id){
+  if(!val('x_desc')){flagBad('x_desc');return toast('तक्रार तपशील आवश्यक.',true);}
+  const old=DB.complaints.filter(x=>x.id===id)[0]||{},status=val('x_status');
+  const rec={id:id||uid(),token:old.token||('C'+String(DB.seq.complaint).padStart(4,'0')),category:val('x_cat'),ward:val('x_ward'),
+    description:val('x_desc'),name:val('x_name'),mobile:val('x_mob'),location:val('x_loc'),status:status,action:val('x_action'),
+    date:old.date||today(),resolvedOn:status===CSTAT[2]?(val('x_rdate')||old.resolvedOn||today()):'',
+    photo:window._photo||old.photo||null,
+    lat:(window._gps&&window._gps.lat)||old.lat||'',lng:(window._gps&&window._gps.lng)||old.lng||''};
+  const i=DB.complaints.findIndex(x=>x.id===id);
+  if(i>-1) DB.complaints[i]=rec; else { DB.complaints.unshift(rec); DB.seq.complaint++; }
+  if(await saveComplaintDoc(rec)){
+    if(i<0) saveModule('meta');
+    logAudit(id?('स्थिती: '+status):'नवीन तक्रार','तक्रार',rec.token);
+    closeModal();renderBody();toast(id?'कार्यवाही नोंदली.':'तक्रार '+rec.token+' नोंदली.');
+  }
+}
+function viewPhoto(id){
+  const c=DB.complaints.filter(x=>x.id===id)[0];
+  modal('तक्रार '+esc(c.token),'<img src="'+c.photo+'" style="width:100%;border-radius:5px" alt="">');
+}
+
+/* ---------- Gram Sabha ---------- */
+PAGES.sabha={actions:()=>addBtn('editSabha()','नोंद करा','Add entry'),
+  body:function(){
+    const L=DB.sabha.filter(s=>match(s,['no','subject','body'])).filter(s=>!filter||s.kind===filter);
+    const rows=L.map(s=>'<tr><td class="regno">'+esc(s.no||'—')+'</td><td><span class="pill p-neutral">'+esc(s.kind)+'</span></td>'+
+      '<td><strong class="mr">'+esc(s.subject)+'</strong><div class="sub mr">'+esc((s.body||'').slice(0,70))+'</div></td>'+
+      '<td class="num">'+dmy(s.date)+'</td><td class="num right">'+esc(s.attendance||'—')+'</td>'+
+      '<td><div class="rowacts"><button class="btn ghost sm" onclick="printSabha(\''+s.id+'\')">छापा</button>'+
+        (can('edit')?'<button class="btn ghost sm" onclick="editSabha(\''+s.id+'\')">दुरुस्ती</button>':'')+'</div></td></tr>');
+    return toolbar('सूचना व ठराव शोधा…',
+      '<select class="filter" onchange="filter=this.value;renderBody()"><option value="">सूचना व ठराव</option>'+
+        '<option value="सूचना" '+(filter==='सूचना'?'selected':'')+'>फक्त सूचना</option>'+
+        '<option value="ठराव" '+(filter==='ठराव'?'selected':'')+'>फक्त ठराव</option></select>',L.length)
+      +sheet({title:'ग्रामसभा नोंदवही',tag:'Gram Sabha register',exportId:'sabha',
+        cols:[{t:'क्रमांक'},{t:'प्रकार'},{t:'विषय / Subject'},{t:'दिनांक'},{t:'उपस्थिती',r:1},{t:''}],
+        rows:rows,emptyTitle:'ग्रामसभा नोंद नाही',emptyNote:'Add a meeting notice or record a resolution.'});
+  }};
+function editSabha(id){
+  if(!guard('edit'))return;
+  const s=DB.sabha.filter(x=>x.id===id)[0]||{kind:'सूचना'};
+  modal(id?'नोंद दुरुस्ती':'ग्रामसभा नोंद','<div class="grid2">'+
+    '<div class="field"><label>प्रकार</label><select id="s_kind">'+['सूचना','ठराव'].map(k=>'<option '+(k===s.kind?'selected':'')+'>'+k+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>क्रमांक</label><input id="s_no" value="'+esc(s.no||'')+'"></div>'+
+    '<div class="field"><label>सभेची तारीख</label><input type="date" id="s_date" value="'+esc(s.date||today())+'"></div>'+
+    '<div class="field"><label>उपस्थित सदस्य</label><input type="number" id="s_att" value="'+esc(s.attendance||'')+'"></div>'+
+    '<div class="field full"><label>विषय<span class="req">*</span></label><input id="s_sub" class="mr" value="'+esc(s.subject||'')+'"></div>'+
+    '<div class="field full"><label>मजकूर</label><textarea id="s_body" class="mr" style="min-height:140px">'+esc(s.body||'')+'</textarea></div></div>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn" onclick="saveSabha(\''+(id||'')+'\')">जतन करा</button>');
+}
+async function saveSabha(id){
+  if(!val('s_sub')){flagBad('s_sub');return toast('विषय आवश्यक.',true);}
+  const rec={id:id||uid(),kind:val('s_kind'),no:val('s_no'),date:val('s_date'),attendance:val('s_att'),subject:val('s_sub'),body:val('s_body')};
+  const i=DB.sabha.findIndex(x=>x.id===id);
+  if(i>-1) DB.sabha[i]=rec; else DB.sabha.unshift(rec);
+  if(await saveModule('sabha')){logAudit(id?'दुरुस्ती':'नवीन नोंद','ग्रामसभा',rec.kind+' '+rec.no);closeModal();renderBody();toast('नोंद जतन झाली.');}
+}
+
+/* ---------- Schemes ---------- */
+PAGES.schemes={actions:()=>addBtn('editScheme()','लाभार्थी नोंदवा','Add beneficiary'),
+  body:function(){
+    const L=DB.schemes.filter(s=>match(s,['name','scheme','appNo'])).filter(s=>!filter||s.status===filter);
+    const rows=L.map(s=>'<tr><td class="regno">'+esc(s.appNo||'—')+'</td>'+
+      '<td><strong class="mr">'+esc(s.name)+'</strong><div class="sub">प्रभाग '+esc(s.ward)+'</div></td>'+
+      '<td class="mr">'+esc(s.scheme)+'</td><td class="num">'+dmy(s.sanctionDate)+'</td>'+
+      '<td class="num right">'+(s.amount?inr(s.amount):'—')+'</td>'+
+      '<td><span class="pill '+(s.status==='मंजूर'?'p-done':s.status==='नामंजूर'?'p-open':'p-prog')+'">'+esc(s.status)+'</span></td>'+
+      '<td><div class="rowacts">'+(can('edit')?'<button class="btn ghost sm" onclick="editScheme(\''+s.id+'\')">दुरुस्ती</button>':'')+
+        (can('delete')?'<button class="btn danger sm" onclick="del(\'schemes\',\''+s.id+'\')">×</button>':'')+'</div></td></tr>');
+    const foot=rows.length?'<tr><td colspan="4" class="right">एकूण मंजूर रक्कम</td><td class="num right">'+
+      inr(sum(L.filter(s=>s.status==='मंजूर'),s=>s.amount))+'</td><td colspan="2"></td></tr>':'';
+    return toolbar('लाभार्थी शोधा…',
+      '<select class="filter" onchange="filter=this.value;renderBody()"><option value="">सर्व स्थिती</option>'+
+        SSTAT.map(s=>'<option '+(filter===s?'selected':'')+'>'+s+'</option>').join('')+'</select>',L.length)
+      +sheet({title:'योजना लाभार्थी नोंदवही',tag:'Scheme beneficiaries',exportId:'schemes',
+        cols:[{t:'अर्ज क्र.'},{t:'लाभार्थी'},{t:'योजना'},{t:'मंजुरी दिनांक'},{t:'रक्कम',r:1},{t:'स्थिती'},{t:''}],
+        rows:rows,foot:foot,emptyTitle:'लाभार्थी नोंद नाही',emptyNote:'Track applicants through to sanction.'});
+  }};
+function editScheme(id){
+  if(!guard('edit'))return;
+  const s=DB.schemes.filter(x=>x.id===id)[0]||{ward:wards()[0],status:SSTAT[0]};
+  modal(id?'लाभार्थी दुरुस्ती':'लाभार्थी नोंदणी','<div class="grid2">'+
+    '<div class="field full"><label>योजना</label><select id="k_scheme">'+SCHEMES.map(x=>'<option '+(x===s.scheme?'selected':'')+'>'+x+'</option>').join('')+'</select></div>'+
+    '<div class="field full"><label>लाभार्थीचे नाव<span class="req">*</span></label><input id="k_name" class="mr" value="'+esc(s.name||'')+'"></div>'+
+    '<div class="field"><label>नागरिक नोंद</label><select id="k_cit">'+citizenOpts(s.citizenId)+'</select></div>'+
+    '<div class="field"><label>प्रभाग</label><select id="k_ward">'+wardOpts(s.ward)+'</select></div>'+
+    '<div class="field"><label>अर्ज क्रमांक</label><input id="k_app" value="'+esc(s.appNo||'')+'"></div>'+
+    '<div class="field"><label>स्थिती</label><select id="k_status">'+SSTAT.map(x=>'<option '+(x===s.status?'selected':'')+'>'+x+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>मंजुरी दिनांक</label><input type="date" id="k_date" value="'+esc(s.sanctionDate||'')+'"></div>'+
+    '<div class="field"><label>मंजूर रक्कम</label><input type="number" id="k_amt" value="'+esc(s.amount||'')+'"></div>'+
+    '<div class="field full"><label>शेरा</label><input id="k_rem" class="mr" value="'+esc(s.remarks||'')+'"></div></div>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn" onclick="saveScheme(\''+(id||'')+'\')">जतन करा</button>');
+}
+async function saveScheme(id){
+  if(!val('k_name')){flagBad('k_name');return toast('लाभार्थीचे नाव आवश्यक.',true);}
+  const rec={id:id||uid(),scheme:val('k_scheme'),name:val('k_name'),citizenId:val('k_cit'),ward:val('k_ward'),
+    appNo:val('k_app'),status:val('k_status'),sanctionDate:val('k_date'),amount:val('k_amt'),remarks:val('k_rem')};
+  const i=DB.schemes.findIndex(x=>x.id===id);
+  if(i>-1) DB.schemes[i]=rec; else DB.schemes.push(rec);
+  if(await saveModule('schemes')){logAudit(id?'दुरुस्ती':'नवीन नोंद','योजना',rec.name);closeModal();renderBody();toast('नोंद जतन झाली.');}
+}
+
+/* ---------- Works ---------- */
+PAGES.works={actions:()=>addBtn('editWork()','काम नोंदवा','Add work'),
+  body:function(){
+    const L=DB.works.filter(w=>match(w,['name','fund','agency'])).filter(w=>!filter||w.status===filter);
+    const rows=L.map(function(w){const p=Number(w.progress)||0;
+      return '<tr><td><strong class="mr">'+esc(w.name)+'</strong><div class="sub mr">'+esc(w.fund||'')+' · प्रभाग '+esc(w.ward)+'</div></td>'+
+      '<td class="num right">'+inr(w.sanction)+'</td><td class="num right">'+inr(w.spent)+'</td>'+
+      '<td class="num">'+dmy(w.start)+' → '+dmy(w.target)+'</td>'+
+      '<td style="min-width:112px"><div class="num" style="font-size:11.5px">'+p+'%</div>'+
+        '<div class="bar '+(p>=100?'good':'')+'"><i style="width:'+Math.min(100,p)+'%"></i></div></td>'+
+      '<td><span class="pill '+(w.status===WSTAT[2]?'p-done':w.status===WSTAT[0]?'p-neutral':'p-prog')+'">'+esc(w.status)+'</span></td>'+
+      '<td><div class="rowacts">'+(can('edit')?'<button class="btn ghost sm" onclick="editWork(\''+w.id+'\')">दुरुस्ती</button>':'')+
+        (can('delete')?'<button class="btn danger sm" onclick="del(\'works\',\''+w.id+'\')">×</button>':'')+'</div></td></tr>';});
+    const sanc=sum(DB.works,w=>w.sanction),spent=sum(DB.works,w=>w.spent);
+    const foot=rows.length?'<tr><td class="right">एकूण</td><td class="num right">'+inr(sum(L,w=>w.sanction))+'</td>'+
+      '<td class="num right">'+inr(sum(L,w=>w.spent))+'</td><td colspan="4"></td></tr>':'';
+    return '<div class="stats">'+
+        '<div class="stat accent"><div class="k">Sanctioned <em>मंजूर निधी</em></div><div class="v">'+inr(sanc)+'</div></div>'+
+        '<div class="stat accent"><div class="k">Expenditure <em>खर्च</em></div><div class="v">'+inr(spent)+'</div>'+
+          '<div class="bar"><i style="width:'+(sanc?Math.min(100,spent/sanc*100):0)+'%"></i></div></div>'+
+        '<div class="stat"><div class="k">Balance <em>शिल्लक</em></div><div class="v">'+inr(sanc-spent)+'</div></div></div>'
+      +toolbar('कामे शोधा…',
+        '<select class="filter" onchange="filter=this.value;renderBody()"><option value="">सर्व स्थिती</option>'+
+          WSTAT.map(s=>'<option '+(filter===s?'selected':'')+'>'+s+'</option>').join('')+'</select>',L.length)
+      +sheet({title:'विकास कामे नोंदवही',tag:'Development works',exportId:'works',
+        cols:[{t:'कामाचे नाव / Work'},{t:'मंजूर',r:1},{t:'खर्च',r:1},{t:'कालावधी'},{t:'प्रगती'},{t:'स्थिती'},{t:''}],
+        rows:rows,foot:foot,emptyTitle:'काम नोंदवलेले नाही',emptyNote:'Add a sanctioned work to monitor progress.'});
+  }};
+function editWork(id){
+  if(!guard('edit'))return;
+  const w=DB.works.filter(x=>x.id===id)[0]||{ward:wards()[0],status:WSTAT[0],progress:0};
+  modal(id?'काम दुरुस्ती':'विकास काम नोंदणी','<div class="grid2">'+
+    '<div class="field full"><label>कामाचे नाव<span class="req">*</span></label><input id="w_name" class="mr" value="'+esc(w.name||'')+'"></div>'+
+    '<div class="field"><label>निधी स्रोत</label><input id="w_fund" class="mr" value="'+esc(w.fund||'')+'" placeholder="१५ वा वित्त आयोग, मनरेगा…"></div>'+
+    '<div class="field"><label>प्रभाग</label><select id="w_ward">'+wardOpts(w.ward)+'</select></div>'+
+    '<div class="field"><label>मंजूर रक्कम</label><input type="number" id="w_sanc" value="'+esc(w.sanction||'')+'"></div>'+
+    '<div class="field"><label>आजपर्यंतचा खर्च</label><input type="number" id="w_spent" value="'+esc(w.spent||'')+'"></div>'+
+    '<div class="field"><label>प्रारंभ दिनांक</label><input type="date" id="w_start" value="'+esc(w.start||'')+'"></div>'+
+    '<div class="field"><label>लक्ष्य पूर्तता</label><input type="date" id="w_target" value="'+esc(w.target||'')+'"></div>'+
+    '<div class="field"><label>प्रत्यक्ष प्रगती (%)</label><input type="number" id="w_prog" min="0" max="100" value="'+esc(w.progress||0)+'"></div>'+
+    '<div class="field"><label>स्थिती</label><select id="w_status">'+WSTAT.map(s=>'<option '+(s===w.status?'selected':'')+'>'+s+'</option>').join('')+'</select></div>'+
+    '<div class="field full"><label>अंमलबजावणी यंत्रणा / ठेकेदार</label><input id="w_agency" class="mr" value="'+esc(w.agency||'')+'"></div></div>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn" onclick="saveWork(\''+(id||'')+'\')">जतन करा</button>');
+}
+async function saveWork(id){
+  if(!val('w_name')){flagBad('w_name');return toast('कामाचे नाव आवश्यक.',true);}
+  const sanc=Number(val('w_sanc'))||0,spent=Number(val('w_spent'))||0;
+  if(spent>sanc&&sanc>0&&!confirm('खर्च मंजूर रकमेपेक्षा जास्त आहे. तरीही जतन करायचे?')) return;
+  const rec={id:id||uid(),name:val('w_name'),fund:val('w_fund'),ward:val('w_ward'),sanction:val('w_sanc'),spent:val('w_spent'),
+    start:val('w_start'),target:val('w_target'),progress:val('w_prog'),status:val('w_status'),agency:val('w_agency')};
+  const i=DB.works.findIndex(x=>x.id===id);
+  if(i>-1) DB.works[i]=rec; else DB.works.push(rec);
+  if(await saveModule('works')){logAudit(id?'दुरुस्ती':'नवीन नोंद','विकास काम',rec.name);closeModal();renderBody();toast('नोंद जतन झाली.');}
+}
+
+/* ---------- Documents ---------- */
+PAGES.docs={actions:()=>addBtn('editDoc()','दस्तऐवज नोंदवा','Add document'),
+  body:function(){
+    const L=DB.docs.filter(d=>match(d,['title','category','refNo','note']));
+    const rows=L.map(d=>'<tr><td class="regno">'+esc(d.refNo||'—')+'</td>'+
+      '<td><strong class="mr">'+esc(d.title)+'</strong><div class="sub mr">'+esc(d.note||'')+'</div></td>'+
+      '<td><span class="pill p-neutral">'+esc(d.category)+'</span></td>'+
+      '<td class="num">'+dmy(d.date)+'</td><td class="mr">'+esc(d.location||'—')+'</td>'+
+      '<td><div class="rowacts">'+(can('edit')?'<button class="btn ghost sm" onclick="editDoc(\''+d.id+'\')">दुरुस्ती</button>':'')+
+        (can('delete')?'<button class="btn danger sm" onclick="del(\'docs\',\''+d.id+'\')">×</button>':'')+'</div></td></tr>');
+    return toolbar('दस्तऐवज शोधा…','',L.length)
+      +sheet({title:'दस्तऐवज नोंदवही',tag:'Document index',exportId:'docs',
+        cols:[{t:'संदर्भ क्र.'},{t:'शीर्षक / Title'},{t:'प्रकार'},{t:'दिनांक'},{t:'ठेवलेले ठिकाण'},{t:''}],
+        rows:rows,emptyTitle:'दस्तऐवज नोंद नाही',emptyNote:'Index circulars and GRs so staff can find them.'})
+      +'<div class="notice">येथे दस्तऐवज कोठे ठेवला आहे याची नोंद होते; प्रत्यक्ष फाइल साठवली जात नाही.</div>';
+  }};
+function editDoc(id){
+  if(!guard('edit'))return;
+  const d=DB.docs.filter(x=>x.id===id)[0]||{};
+  modal(id?'दस्तऐवज दुरुस्ती':'दस्तऐवज नोंद','<div class="grid2">'+
+    '<div class="field full"><label>शीर्षक<span class="req">*</span></label><input id="o_title" class="mr" value="'+esc(d.title||'')+'"></div>'+
+    '<div class="field"><label>प्रकार</label><select id="o_cat">'+DCATS.map(c=>'<option '+(c===d.category?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>संदर्भ क्रमांक</label><input id="o_ref" value="'+esc(d.refNo||'')+'"></div>'+
+    '<div class="field"><label>दिनांक</label><input type="date" id="o_date" value="'+esc(d.date||today())+'"></div>'+
+    '<div class="field"><label>ठेवलेले ठिकाण</label><input id="o_loc" class="mr" value="'+esc(d.location||'')+'" placeholder="कपाट २, फाइल ब"></div>'+
+    '<div class="field full"><label>टीप</label><textarea id="o_note" class="mr">'+esc(d.note||'')+'</textarea></div></div>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn" onclick="saveDoc(\''+(id||'')+'\')">जतन करा</button>');
+}
+async function saveDoc(id){
+  if(!val('o_title')){flagBad('o_title');return toast('शीर्षक आवश्यक.',true);}
+  const rec={id:id||uid(),title:val('o_title'),category:val('o_cat'),refNo:val('o_ref'),date:val('o_date'),location:val('o_loc'),note:val('o_note')};
+  const i=DB.docs.findIndex(x=>x.id===id);
+  if(i>-1) DB.docs[i]=rec; else DB.docs.unshift(rec);
+  if(await saveModule('docs')){logAudit(id?'दुरुस्ती':'नवीन नोंद','दस्तऐवज',rec.title);closeModal();renderBody();toast('नोंद जतन झाली.');}
+}
+
+/* ---------- Reports ---------- */
+PAGES.reports={actions:()=>'<button class="btn ghost" onclick="printReports()">अहवाल छापा</button>',
+  body:function(){
+    const wardRows=wards().map(function(w){
+      const props=DB.properties.filter(p=>p.ward===w);
+      const dem=sum(props,p=>demandFor(p).total);
+      const col=sum(DB.receipts.filter(r=>r.fy===TENANT.fy&&props.some(p=>p.id===r.propId)),r=>r.total);
+      const pct=dem?Math.round(col/dem*100):0;
+      return '<tr><td class="num">'+esc(w)+'</td><td class="num right">'+DB.citizens.filter(c=>c.ward===w).length+'</td>'+
+        '<td class="num right">'+props.length+'</td><td class="num right">'+inr(dem)+'</td><td class="num right">'+inr(col)+'</td>'+
+        '<td class="num right">'+inr(dem-col)+'</td>'+
+        '<td style="min-width:104px"><div class="bar '+(pct>=70?'good':pct<30?'bad':'')+'"><i style="width:'+Math.min(100,pct)+'%"></i></div>'+
+          '<div class="num sub">'+pct+'%</div></td>'+
+        '<td class="num right">'+DB.complaints.filter(c=>c.ward===w&&c.status!==CSTAT[2]).length+'</td></tr>';});
+    const headRows=TAX_HEADS.map(function(h){
+      const dem=sum(DB.properties,p=>Number(p[h[0]])||0);
+      const col=sum(DB.receipts.filter(r=>r.fy===TENANT.fy),r=>Number(r.heads&&r.heads[h[0]])||0);
+      return '<tr><td class="mr">'+h[1]+' <span class="sub">'+h[2]+'</span></td><td class="num right">'+inr(dem)+'</td>'+
+        '<td class="num right">'+inr(col)+'</td><td class="num right">'+inr(dem-col)+'</td>'+
+        '<td class="num right">'+(dem?Math.round(col/dem*100):0)+'%</td></tr>';});
+    const catRows=CATS.map(function(k){
+      const all=DB.complaints.filter(c=>c.category===k);if(!all.length)return '';
+      const done=all.filter(c=>c.status===CSTAT[2]).length;
+      return '<tr><td class="mr">'+k+'</td><td class="num right">'+all.length+'</td><td class="num right">'+done+'</td>'+
+        '<td class="num right">'+(all.length-done)+'</td><td class="num right">'+Math.round(done/all.length*100)+'%</td></tr>';}).filter(Boolean);
+    return sheet({title:'प्रभागनिहाय सारांश',tag:'Ward-wise summary',
+        cols:[{t:'प्रभाग'},{t:'नागरिक',r:1},{t:'मालमत्ता',r:1},{t:'मागणी',r:1},{t:'वसुली',r:1},{t:'थकबाकी',r:1},{t:'वसुली %'},{t:'प्रलंबित',r:1}],
+        rows:wardRows,emptyTitle:'—'})
+      +'<div style="height:18px"></div>'
+      +sheet({title:'करनिहाय वसुली',tag:'Collection by head',
+        cols:[{t:'कर प्रकार'},{t:'मागणी',r:1},{t:'वसुली',r:1},{t:'शिल्लक',r:1},{t:'%',r:1}],rows:headRows,emptyTitle:'—'})
+      +'<div style="height:18px"></div>'
+      +sheet({title:'तक्रार निवारण',tag:'Complaint resolution',
+        cols:[{t:'प्रकार'},{t:'नोंदवलेल्या',r:1},{t:'निवारण',r:1},{t:'प्रलंबित',r:1},{t:'दर',r:1}],
+        rows:catRows,emptyTitle:'तक्रार नोंद नाही',emptyNote:'Resolution rates appear once complaints are logged.'})
+      +'<div style="height:18px"></div><div class="stats">'+
+        '<div class="stat"><div class="k">Births <em>जन्म नोंदी</em></div><div class="v">'+DB.births.length+'</div>'+
+          '<div class="n">'+DB.births.filter(b=>b.sex===SEXES[0]).length+' पुरुष · '+DB.births.filter(b=>b.sex===SEXES[1]).length+' स्त्री</div></div>'+
+        '<div class="stat"><div class="k">Deaths <em>मृत्यू नोंदी</em></div><div class="v">'+DB.deaths.length+'</div>'+
+          '<div class="n">'+DB.deaths.filter(d=>d.sex===SEXES[0]).length+' पुरुष · '+DB.deaths.filter(d=>d.sex===SEXES[1]).length+' स्त्री</div></div>'+
+        '<div class="stat"><div class="k">Sanctioned <em>मंजूर लाभार्थी</em></div><div class="v">'+DB.schemes.filter(s=>s.status==='मंजूर').length+'</div>'+
+          '<div class="n">'+DB.schemes.length+' अर्जांपैकी</div></div>'+
+        '<div class="stat"><div class="k">Works done <em>पूर्ण कामे</em></div><div class="v">'+DB.works.filter(w=>w.status===WSTAT[2]).length+'</div>'+
+          '<div class="n">'+DB.works.length+' मंजूरपैकी</div></div></div>';
+  }};
+
+/* ---------- Audit ---------- */
+PAGES.audit={actions:()=>'<button class="btn ghost" onclick="exportCSV(\'audit\')">CSV</button>',
+  body:function(){
+    const L=DB.audit.filter(a=>match(a,['user','action','module','ref'])).slice(0,300);
+    const rows=L.map(a=>'<tr><td class="num">'+dmy(String(a.ts).slice(0,10))+'<div class="sub num">'+String(a.ts).slice(11,16)+'</div></td>'+
+      '<td class="mr"><strong>'+esc(a.user)+'</strong><div class="sub mr">'+esc(a.role)+'</div></td>'+
+      '<td class="mr">'+esc(a.action)+'</td><td class="mr">'+esc(a.module)+'</td><td class="mr sub">'+esc(a.ref)+'</td></tr>');
+    return toolbar('नोंद तपशील शोधा…','',DB.audit.length)
+      +sheet({title:'नोंद तपशील',tag:'Audit trail — last 300',
+        cols:[{t:'दिनांक व वेळ'},{t:'वापरकर्ता'},{t:'कृती'},{t:'विभाग'},{t:'संदर्भ'}],
+        rows:rows,emptyTitle:'नोंद नाही',emptyNote:'Every entry, edit and receipt is recorded here.'})
+      +'<div class="notice">प्रत्येक नोंद, दुरुस्ती व पावती येथे नोंदली जाते. ॲपमधून ही यादी बदलता किंवा पुसता येत नाही.</div>';
+  }};
+
+/* ---------- Staff ---------- */
+let STAFF=[];
+PAGES.staff={actions:()=>can('staff')?'<button class="btn amber" onclick="addStaff()">वापरकर्ता जोडा · Add login</button>':'',
+  body:function(){
+    loadStaff();
+    const rows=STAFF.map(s=>'<tr>'+
+      '<td><strong class="mr">'+esc(s.name||'—')+'</strong><div class="sub num">'+esc(s.username||'')+'</div></td>'+
+      '<td class="mr">'+esc((ROLES[s.role]&&ROLES[s.role].mr)||s.role)+'</td>'+
+      '<td>'+(s.active!==false?'<span class="pill p-done">सुरू</span>':'<span class="pill p-open">बंद</span>')+'</td>'+
+      '<td>'+(s.uid===TENANT.ownerUid?'<span class="pill p-neutral">मुख्य</span>':'')+'</td>'+
+      '<td><div class="rowacts">'+((can('staff')&&s.uid!==TENANT.ownerUid)
+        ?'<button class="btn ghost sm" onclick="toggleStaff(\''+s.uid+'\','+(s.active!==false)+')">'+(s.active!==false?'बंद करा':'सुरू करा')+'</button>':'')+'</div></td></tr>');
+    return sheet({title:'वापरकर्ते',tag:'Staff logins',
+      cols:[{t:'नाव / Login'},{t:'पद'},{t:'स्थिती'},{t:''},{t:''}],
+      rows:rows,emptyTitle:'लोड होत आहे…',emptyNote:''})
+      +'<div class="notice">प्रत्येक कर्मचाऱ्याला स्वतंत्र लॉगिन द्या — नोंद तपशीलात कोणी काय केले हे तेव्हाच कळते. '+
+        'पासवर्ड विसरल्यास जुना लॉगिन बंद करून नवीन तयार करा.<br>'+
+        '<span style="color:#7A6636">Give every staff member their own login; that is what makes the audit trail meaningful.</span></div>';
+  }};
+async function loadStaff(){
+  try{
+    const s=await fdb.collection('users').where('gpId','==',GPID).get();
+    STAFF=s.docs.map(d=>Object.assign({uid:d.id},d.data()));
+    if(page==='staff') $('#view').innerHTML=PAGES.staff.body();
+  }catch(e){}
+}
+function addStaff(){
+  if(!guard('staff'))return;
+  modal('नवीन वापरकर्ता · Add login','<div class="grid2">'+
+    '<div class="field full"><label>नाव<span class="req">*</span></label><input id="u_name" class="mr"></div>'+
+    '<div class="field"><label>पद<span class="req">*</span></label><select id="u_role">'+
+      Object.keys(ROLES).map(k=>'<option value="'+k+'">'+ROLES[k].mr+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>वापरकर्ता नाव<span class="req">*</span></label><input id="u_user" placeholder="gp_clerk1"></div>'+
+    '<div class="field full"><label>पासवर्ड<span class="req">*</span></label><input type="password" id="u_pass"></div></div>',
+    '<button class="btn ghost" onclick="closeModal()">रद्द</button><button class="btn" onclick="saveStaff()">तयार करा</button>');
+}
+async function saveStaff(){
+  const name=val('u_name'),role=val('u_role'),user=val('u_user'),pass=$('#u_pass').value;
+  if(!name){flagBad('u_name');return toast('नाव आवश्यक.',true);}
+  if(!/^[a-zA-Z0-9_.-]{4,}$/.test(user)){flagBad('u_user');return toast('वापरकर्ता नाव किमान ४ इंग्रजी अक्षरे.',true);}
+  if(pass.length<6){flagBad('u_pass');return toast('पासवर्ड किमान ६ अक्षरे.',true);}
+  try{
+    let sec=null;
+    firebase.apps.forEach(function(a){ if(a.name==='sec') sec=a; });
+    if(!sec) sec=firebase.initializeApp(FIREBASE_CONFIG,'sec');
+    const cred=await sec.auth().createUserWithEmailAndPassword(emailFor(user),pass);
+    await fdb.collection('users').doc(cred.user.uid).set({
+      gpId:GPID,role:role,name:name,username:user,active:true,createdAt:FV.serverTimestamp()});
+    await sec.auth().signOut();
+    logAudit('वापरकर्ता तयार','व्यवस्थापन',name+' ('+user+')');
+    closeModal(); loadStaff(); toast('वापरकर्ता तयार झाला.');
+  }catch(e){
+    toast(e.code==='auth/email-already-in-use'?'हे वापरकर्ता नाव आधीच वापरात आहे.':'तयार झाले नाही — '+(e.message||''),true);
+  }
+}
+async function toggleStaff(uid2,active){
+  if(!guard('staff'))return;
+  try{
+    await fdb.collection('users').doc(uid2).update({active:!active});
+    logAudit(active?'प्रवेश बंद':'प्रवेश सुरू','व्यवस्थापन',uid2);
+    loadStaff(); toast('बदल जतन झाला.');
+  }catch(e){ toast('बदल झाला नाही.',true); }
+}
+
+/* ---------- Subscription ---------- */
+PAGES.account={actions:()=>'<button class="btn ghost" onclick="exportData()">बॅकअप घ्या · Backup</button>',
+  body:function(){
+    const d=daysLeft(), st=TENANT.status, ed=expiryDate();
+    const labels={trial:'मोफत चाचणी',active:'सदस्यत्व सुरू',suspended:'बंद',expired:'मुदत संपली'};
+    const counts=[['नागरिक',DB.citizens.length],['मालमत्ता',DB.properties.length],['पावत्या',DB.receipts.length],
+      ['तक्रारी',DB.complaints.length],['जन्म',DB.births.length],['मृत्यू',DB.deaths.length],
+      ['योजना',DB.schemes.length],['कामे',DB.works.length]];
+    return '<div class="stats">'+
+        '<div class="stat accent"><div class="k">Status <em>स्थिती</em></div>'+
+          '<div class="v" style="font-size:17px;font-family:var(--dev)">'+esc(labels[st]||st)+'</div>'+
+          '<div class="n">'+esc(TENANT.plan||'—')+'</div></div>'+
+        '<div class="stat accent"><div class="k">Valid until <em>मुदत</em></div>'+
+          '<div class="v" style="font-size:17px">'+(ed?dmy(ed.toISOString().slice(0,10)):'—')+'</div>'+
+          '<div class="n">'+(d>0?d+' दिवस शिल्लक':'संपली')+'</div></div>'+
+        '<div class="stat"><div class="k">GP code <em>कोड</em></div><div class="v" style="font-size:15px">'+esc(GPID)+'</div>'+
+          '<div class="n">नूतनीकरणासाठी हा क्रमांक सांगा</div></div>'+
+        '<div class="stat"><div class="k">Total records <em>एकूण नोंदी</em></div>'+
+          '<div class="v">'+counts.reduce((t,c)=>t+c[1],0)+'</div></div></div>'+
+      sheet({title:'नोंदींचा तपशील',tag:'Records in this panchayat',
+        cols:[{t:'नोंदवही'},{t:'नोंदी',r:1}],
+        rows:counts.map(c=>'<tr><td class="mr">'+c[0]+'</td><td class="num right">'+c[1]+'</td></tr>'),emptyTitle:'—'})+
+      '<div class="notice" style="margin-top:16px"><strong class="mr">सदस्यत्व व संपर्क</strong><br>'+
+        esc(VENDOR.name)+' · '+esc(VENDOR.phone)+' · '+esc(VENDOR.email)+'<br>'+
+        '<span style="color:#7A6636">Renewals, extra logins and training — contact us with your GP code.</span>'+
+        '<div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">'+
+          '<a class="btn amber sm" target="_blank" rel="noopener" href="'+waLink('ग्रामपंचायत प्रशासन प्रणाली — सदस्यत्व. कोड: '+GPID)+'">WhatsApp</a>'+
+          '<a class="btn ghost sm" href="tel:'+VENDOR.phone.replace(/\s/g,'')+'">कॉल करा</a>'+
+        '</div></div>';
+  }};
+
+/* =====================================================================
+   Printing
+   ===================================================================== */
+function letterhead(sub){
+  const g=TENANT,init=(g.name||'ग्रा').replace('ग्रामपंचायत','').trim().slice(0,2)||'ग्रा';
+  return '<div class="lh"><div class="pseal">'+esc(init)+'</div>'+
+    '<div class="l1">'+esc(g.name)+'</div>'+
+    '<div class="l2">'+esc(['ता. '+(g.taluka||''),'जि. '+(g.district||''),g.state||''].filter(Boolean).join(' · '))+'</div>'+
+    '<div class="l3">'+(sub||'Office of the Gram Panchayat')+'</div></div>'+
+    '<div class="meta"><span>क्र. / No. '+esc(g.code||'—')+'</span><span>दिनांक '+dmy(today())+'</span></div>';
+}
+const signBlock=(l,r)=>'<div class="sign">'+
+  '<div class="box"><div class="line">'+esc(l.n)+'<small>'+esc(l.t)+'</small></div></div>'+
+  '<div class="box"><div class="sealbox">कार्यालयीन शिक्का<br>Office seal</div></div>'+
+  '<div class="box"><div class="line">'+esc(r.n)+'<small>'+esc(r.t)+'</small></div></div></div>';
+const docFoot=n=>'<div class="foot"><span>'+n+'</span><span>'+esc(TENANT.name)+' · '+dmy(today())+'</span></div>';
+function doPrint(h,land){$('#printArea').innerHTML='<div class="doc'+(land?' land':'')+'">'+h+'</div>';window.print();}
+
+function printReceipt(id){
+  const r=DB.receipts.filter(x=>x.id===id)[0];if(!r)return;
+  const rows=TAX_HEADS.filter(h=>r.heads[h[0]]).map(h=>'<tr><td class="k">'+h[1]+' / '+h[2]+'</td><td class="num">'+inr(r.heads[h[0]])+'</td></tr>').join('')+
+    (r.arrears?'<tr><td class="k">मागील थकबाकी / Arrears</td><td class="num">'+inr(r.arrears)+'</td></tr>':'');
+  doPrint(letterhead('Tax Collection Receipt')+
+    '<h3>कर पावती<small>Tax Receipt</small></h3><div class="rule"></div><table>'+
+      '<tr><td class="k">पावती क्रमांक / Receipt no.</td><td class="num"><strong>'+esc(r.receiptNo)+'</strong></td></tr>'+
+      '<tr><td class="k">दिनांक / Date</td><td class="num">'+dmy(r.date)+'</td></tr>'+
+      '<tr><td class="k">मालमत्ता क्रमांक / Property no.</td><td class="num">'+esc(r.propNo)+'</td></tr>'+
+      '<tr><td class="k">कडून मिळाले / Received from</td><td>'+esc(r.owner)+'</td></tr>'+
+      '<tr><td class="k">आर्थिक वर्ष / Financial year</td><td class="num">'+esc(r.fy)+'</td></tr>'+rows+
+      '<tr><td class="k">एकूण रक्कम / Total received</td><td class="num"><strong>'+inr(r.total)+'</strong></td></tr>'+
+      '<tr><td class="k">प्रकार / Mode</td><td>'+esc(r.mode)+(r.ref?' — '+esc(r.ref):'')+'</td></tr></table>'+
+    signBlock({n:'देणाऱ्याची सही',t:"Payer's signature"},{n:TENANT.gramsevak||'ग्रामसेवक',t:'ग्रामसेवक · Gram Sevak'})+
+    docFoot('संगणकीकृत पावती — सांभाळून ठेवा. Issued by '+esc(r.by||'—')));
+}
+function printCert(kind,id){
+  if(kind==='birth'){
+    const b=DB.births.filter(x=>x.id===id)[0];if(!b)return;
+    doPrint(letterhead('Extract of Birth Register')+
+      '<h3>जन्म नोंद उतारा<small>Extract of Birth Register</small></h3><div class="rule"></div><table>'+
+        '<tr><td class="k">नोंदणी क्रमांक / Registration no.</td><td class="num"><strong>'+esc(b.regNo)+'</strong></td></tr>'+
+        '<tr><td class="k">नोंद दिनांक / Date of registration</td><td class="num">'+dmy(b.regDate)+'</td></tr>'+
+        '<tr><td class="k">बालकाचे नाव / Name of child</td><td>'+esc(b.child||'—')+'</td></tr>'+
+        '<tr><td class="k">लिंग / Sex</td><td>'+esc(b.sex||'—')+'</td></tr>'+
+        '<tr><td class="k">जन्म दिनांक / Date of birth</td><td class="num">'+dmy(b.dob)+'</td></tr>'+
+        '<tr><td class="k">जन्म ठिकाण / Place of birth</td><td>'+esc(b.place||'—')+'</td></tr>'+
+        '<tr><td class="k">वडिलांचे नाव / Father\'s name</td><td>'+esc(b.father||'—')+'</td></tr>'+
+        '<tr><td class="k">आईचे नाव / Mother\'s name</td><td>'+esc(b.mother||'—')+'</td></tr>'+
+        '<tr><td class="k">पत्ता / Address</td><td>'+esc(b.address||'—')+'</td></tr>'+
+        '<tr><td class="k">माहिती देणारा / Informant</td><td>'+esc(b.informant||'—')+'</td></tr></table>'+
+      signBlock({n:'दिनांक: '+dmy(today()),t:'Date of issue'},{n:TENANT.gramsevak||'ग्रामसेवक',t:'ग्रामसेवक तथा निबंधक · Registrar'})+
+      docFoot('ग्रामपंचायत जन्म नोंदवहीतील कार्यालयीन उतारा. कायदेशीर दाखला CRS मार्फत दिला जातो.'));
+  }else{
+    const d=DB.deaths.filter(x=>x.id===id)[0];if(!d)return;
+    doPrint(letterhead('Extract of Death Register')+
+      '<h3>मृत्यू नोंद उतारा<small>Extract of Death Register</small></h3><div class="rule"></div><table>'+
+        '<tr><td class="k">नोंदणी क्रमांक / Registration no.</td><td class="num"><strong>'+esc(d.regNo)+'</strong></td></tr>'+
+        '<tr><td class="k">नोंद दिनांक / Date of registration</td><td class="num">'+dmy(d.regDate)+'</td></tr>'+
+        '<tr><td class="k">मृताचे नाव / Name of deceased</td><td>'+esc(d.name)+'</td></tr>'+
+        '<tr><td class="k">लिंग / Sex</td><td>'+esc(d.sex||'—')+'</td></tr>'+
+        '<tr><td class="k">मृत्यू दिनांक / Date of death</td><td class="num">'+dmy(d.dod)+'</td></tr>'+
+        '<tr><td class="k">वय / Age at death</td><td class="num">'+esc(d.age||'—')+'</td></tr>'+
+        '<tr><td class="k">मृत्यू ठिकाण / Place of death</td><td>'+esc(d.place||'—')+'</td></tr>'+
+        '<tr><td class="k">पत्ता / Address</td><td>'+esc(d.address||'—')+'</td></tr>'+
+        '<tr><td class="k">माहिती देणारा / Informant</td><td>'+esc(d.relative||'—')+'</td></tr></table>'+
+      signBlock({n:'दिनांक: '+dmy(today()),t:'Date of issue'},{n:TENANT.gramsevak||'ग्रामसेवक',t:'ग्रामसेवक तथा निबंधक · Registrar'})+
+      docFoot('ग्रामपंचायत मृत्यू नोंदवहीतील कार्यालयीन उतारा. कायदेशीर दाखला CRS मार्फत दिला जातो.'));
+  }
+}
+function printSabha(id){
+  const s=DB.sabha.filter(x=>x.id===id)[0];if(!s)return;
+  const isN=s.kind==='सूचना';
+  doPrint(letterhead(isN?'Gram Sabha Notice':'Gram Sabha Resolution')+
+    '<h3>'+(isN?'ग्रामसभा सूचना':'ग्रामसभा ठराव')+'<small>'+(isN?'Gram Sabha Notice':'Gram Sabha Resolution')+'</small></h3><div class="rule"></div>'+
+    '<table><tr><td class="k">क्रमांक / Number</td><td class="num"><strong>'+esc(s.no||'—')+'</strong></td></tr>'+
+      '<tr><td class="k">दिनांक / Date</td><td class="num">'+dmy(s.date)+'</td></tr>'+
+      '<tr><td class="k">विषय / Subject</td><td>'+esc(s.subject)+'</td></tr>'+
+      (s.attendance?'<tr><td class="k">उपस्थित सदस्य / Present</td><td class="num">'+esc(s.attendance)+'</td></tr>':'')+'</table>'+
+    '<div style="white-space:pre-wrap;font-size:12.5px;line-height:1.75;padding:8px 2px">'+esc(s.body||'')+'</div>'+
+    signBlock({n:TENANT.sarpanch||'सरपंच',t:'सरपंच · Sarpanch'},{n:TENANT.gramsevak||'ग्रामसेवक',t:'ग्रामसेवक · Gram Sevak'})+
+    docFoot('ग्रामपंचायत कार्यालयीन नोंद.'));
+}
+function printDaily(){
+  const d=today();
+  const rec=DB.receipts.filter(r=>r.date===d),comp=DB.complaints.filter(c=>c.date===d);
+  doPrint(letterhead('Daily Office Report')+
+    '<h3>दैनिक कार्यालयीन अहवाल<small>Daily Office Report · '+dmy(d)+'</small></h3><div class="rule"></div>'+
+    '<table><tr><th colspan="4">आजची वसुली · Collection today</th></tr>'+
+      (rec.length?rec.map(r=>'<tr><td class="num">'+esc(r.receiptNo)+'</td><td>'+esc(r.owner)+'</td>'+
+        '<td class="num">'+esc(r.mode)+'</td><td class="num">'+inr(r.total)+'</td></tr>').join('')+
+        '<tr><td colspan="3"><strong>एकूण / Total</strong></td><td class="num"><strong>'+inr(sum(rec,r=>r.total))+'</strong></td></tr>'
+        :'<tr><td colspan="4">आज वसुली नाही · No collection recorded today.</td></tr>')+'</table>'+
+    '<table><tr><th colspan="4">आजच्या तक्रारी · Complaints today</th></tr>'+
+      (comp.length?comp.map(c=>'<tr><td class="num">'+esc(c.token)+'</td><td>'+esc(c.category)+'</td>'+
+        '<td class="num">प्रभाग '+esc(c.ward)+'</td><td>'+esc(c.status)+'</td></tr>').join('')
+        :'<tr><td colspan="4">आज तक्रार नाही · No complaints logged today.</td></tr>')+'</table>'+
+    signBlock({n:TENANT.sarpanch||'सरपंच',t:'सरपंच · Sarpanch'},{n:TENANT.gramsevak||'ग्रामसेवक',t:'ग्रामसेवक · Gram Sevak'})+
+    docFoot('Prepared by '+esc((USER&&USER.name)||'—')));
+}
+function printReports(){
+  const rows=wards().map(function(w){
+    const props=DB.properties.filter(p=>p.ward===w);
+    const dem=sum(props,p=>demandFor(p).total);
+    const col=sum(DB.receipts.filter(r=>r.fy===TENANT.fy&&props.some(p=>p.id===r.propId)),r=>r.total);
+    return '<tr><td class="num">'+esc(w)+'</td><td class="num">'+DB.citizens.filter(c=>c.ward===w).length+'</td>'+
+      '<td class="num">'+props.length+'</td><td class="num">'+inr(dem)+'</td><td class="num">'+inr(col)+'</td>'+
+      '<td class="num">'+inr(dem-col)+'</td><td class="num">'+(dem?Math.round(col/dem*100):0)+'%</td></tr>';}).join('');
+  const dem=sum(DB.properties,p=>demandFor(p).total),col=sum(DB.receipts.filter(r=>r.fy===TENANT.fy),r=>r.total);
+  doPrint(letterhead('Annual Summary Report')+
+    '<h3>प्रभागनिहाय मागणी व वसुली अहवाल<small>Ward-wise Demand and Collection · FY '+esc(TENANT.fy)+'</small></h3><div class="rule"></div>'+
+    '<table><tr><th>प्रभाग</th><th>नागरिक</th><th>मालमत्ता</th><th>मागणी</th><th>वसुली</th><th>थकबाकी</th><th>वसुली %</th></tr>'+
+      rows+'<tr><td colspan="3"><strong>एकूण / Total</strong></td><td class="num"><strong>'+inr(dem)+'</strong></td>'+
+      '<td class="num"><strong>'+inr(col)+'</strong></td><td class="num"><strong>'+inr(dem-col)+'</strong></td>'+
+      '<td class="num"><strong>'+(dem?Math.round(col/dem*100):0)+'%</strong></td></tr></table>'+
+    signBlock({n:TENANT.sarpanch||'सरपंच',t:'सरपंच · Sarpanch'},{n:TENANT.gramsevak||'ग्रामसेवक',t:'ग्रामसेवक · Gram Sevak'})+
+    docFoot('संगणकीकृत अहवाल · Computer-generated report'));
+}
+
+const REGDEFS={
+  citizens:{t:'नागरिक नोंदवही',h:['अ.क्र.','नाव','घर क्र.','प्रभाग','लिंग','वय','मोबाइल','व्यवसाय'],
+    r:()=>DB.citizens.map((c,i)=>[i+1,c.name,c.houseNo,c.ward,c.gender,ageFrom(c.dob),c.mobile,c.occupation])},
+  properties:{t:'मालमत्ता नोंदवही (नमुना ८)',h:['मालमत्ता क्र.','मालक','प्रभाग','प्रकार','क्षेत्र','घरपट्टी','पाणीपट्टी','आरोग्य','दिवाबत्ती','थकबाकी','एकूण'],
+    r:()=>DB.properties.map(function(p){const d=demandFor(p);return [p.propNo,p.owner,p.ward,p.type,p.area,d.house,d.water,d.health,d.light,d.arrears,d.total];})},
+  tax:{t:'मागणी व वसुली नोंदवही (नमुना ९/१०)',h:['मालमत्ता क्र.','मालक','प्रभाग','एकूण मागणी','पावती क्र.','वसुली दिनांक','वसूल रक्कम','स्थिती'],
+    r:()=>DB.properties.filter(p=>demandFor(p).total>0).map(function(p){const r=paidFor(p.id);
+      return [p.propNo,p.owner,p.ward,demandFor(p).total,r?r.receiptNo:'',r?dmy(r.date):'',r?r.total:'',r?'वसूल':'थकीत'];})},
+  births:{t:'जन्म नोंदवही',h:['नोंदणी क्र.','बालकाचे नाव','लिंग','जन्म दिनांक','ठिकाण','वडील','आई','पत्ता','नोंद दिनांक'],
+    r:()=>DB.births.map(b=>[b.regNo,b.child,b.sex,dmy(b.dob),b.place,b.father,b.mother,b.address,dmy(b.regDate)])},
+  deaths:{t:'मृत्यू नोंदवही',h:['नोंदणी क्र.','नाव','लिंग','मृत्यू दिनांक','वय','ठिकाण','माहिती देणारा','नोंद दिनांक'],
+    r:()=>DB.deaths.map(d=>[d.regNo,d.name,d.sex,dmy(d.dod),d.age,d.place,d.relative,dmy(d.regDate)])},
+  complaints:{t:'तक्रार नोंदवही',h:['टोकन','प्रकार','तक्रारदार','मोबाइल','प्रभाग','दिनांक','स्थिती','कार्यवाही'],
+    r:()=>DB.complaints.map(c=>[c.token,c.category,c.name,c.mobile,c.ward,dmy(c.date),c.status,c.action])},
+  sabha:{t:'ग्रामसभा नोंदवही',h:['क्रमांक','प्रकार','विषय','दिनांक','उपस्थिती'],
+    r:()=>DB.sabha.map(s=>[s.no,s.kind,s.subject,dmy(s.date),s.attendance])},
+  schemes:{t:'योजना लाभार्थी नोंदवही',h:['अर्ज क्र.','लाभार्थी','योजना','प्रभाग','मंजुरी दिनांक','रक्कम','स्थिती'],
+    r:()=>DB.schemes.map(s=>[s.appNo,s.name,s.scheme,s.ward,dmy(s.sanctionDate),s.amount,s.status])},
+  works:{t:'विकास कामे नोंदवही',h:['कामाचे नाव','निधी','प्रभाग','मंजूर','खर्च','प्रारंभ','लक्ष्य','प्रगती %','स्थिती'],
+    r:()=>DB.works.map(w=>[w.name,w.fund,w.ward,w.sanction,w.spent,dmy(w.start),dmy(w.target),w.progress,w.status])},
+  docs:{t:'दस्तऐवज नोंदवही',h:['संदर्भ क्र.','शीर्षक','प्रकार','दिनांक','ठिकाण'],
+    r:()=>DB.docs.map(d=>[d.refNo,d.title,d.category,dmy(d.date),d.location])},
+  audit:{t:'नोंद तपशील',h:['दिनांक','वेळ','वापरकर्ता','पद','कृती','विभाग','संदर्भ'],
+    r:()=>DB.audit.map(a=>[dmy(String(a.ts).slice(0,10)),String(a.ts).slice(11,16),a.user,a.role,a.action,a.module,a.ref])}
+};
+function printRegister(id){
+  const d=REGDEFS[id];if(!d)return;
+  const rows=d.r();
+  if(!rows.length) return toast('नोंदवही रिकामी आहे.',true);
+  doPrint(letterhead('Register Extract')+
+    '<h3>'+d.t+'<small>FY '+esc(TENANT.fy)+' · '+rows.length+' entries</small></h3><div class="rule"></div>'+
+    '<table><tr>'+d.h.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr>'+
+      rows.map(r=>'<tr>'+r.map(c=>'<td>'+esc(c==null?'':c)+'</td>').join('')+'</tr>').join('')+'</table>'+
+    signBlock({n:TENANT.sarpanch||'सरपंच',t:'सरपंच · Sarpanch'},{n:TENANT.gramsevak||'ग्रामसेवक',t:'ग्रामसेवक · Gram Sevak'})+
+    docFoot('संगणकीकृत नोंदवही उतारा'),true);
+}
+function exportCSV(id){
+  const d=REGDEFS[id];if(!d)return;
+  const rows=d.r();
+  if(!rows.length) return toast('नोंदवही रिकामी आहे.',true);
+  const Q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const csv='﻿'+[d.h.map(Q).join(',')].concat(rows.map(r=>r.map(Q).join(','))).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=id+'-'+TENANT.fy+'-'+today()+'.csv';a.click();URL.revokeObjectURL(a.href);
+  toast('CSV फाइल डाउनलोड झाली.');
+}
+function exportData(){
+  const ed=expiryDate();
+  const payload={gpId:GPID,gp:Object.assign({},TENANT,{expiresAt:ed?ed.toISOString():null}),
+    exportedAt:new Date().toISOString(),data:DB};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
+  a.download='gp-backup-'+GPID+'-'+today()+'.json';a.click();URL.revokeObjectURL(a.href);
+  toast('बॅकअप फाइल डाउनलोड झाली.');
+}
+
+/* ---------- Settings & delete ---------- */
+function openSettings(){
+  const g=TENANT,admin=can('settings');
+  const dis=admin?'':'disabled';
+  modal('कार्यालय तपशील · Office details','<div class="grid2">'+
+    '<div class="field full"><label>ग्रामपंचायतीचे नाव</label><input id="g_name" class="mr" value="'+esc(g.name)+'" '+dis+'></div>'+
+    '<div class="field"><label>तालुका</label><input id="g_tal" class="mr" value="'+esc(g.taluka||'')+'" '+dis+'></div>'+
+    '<div class="field"><label>जिल्हा</label><input id="g_dist" class="mr" value="'+esc(g.district||'')+'" '+dis+'></div>'+
+    '<div class="field"><label>सरपंच</label><input id="g_sar" class="mr" value="'+esc(g.sarpanch||'')+'" '+dis+'></div>'+
+    '<div class="field"><label>ग्रामसेवक</label><input id="g_gs" class="mr" value="'+esc(g.gramsevak||'')+'" '+dis+'></div>'+
+    '<div class="field"><label>आर्थिक वर्ष</label><input id="g_fy" value="'+esc(g.fy||'')+'" '+dis+'></div>'+
+    '<div class="field"><label>कार्यालय जावक क्र.</label><input id="g_code" value="'+esc(g.code||'')+'" '+dis+'></div>'+
+    '<div class="field full"><label>प्रभाग (स्वल्पविरामाने)</label><input id="g_wards" value="'+esc((g.wards||[]).join(', '))+'" '+dis+'></div></div>'+
+    '<div class="notice">माहिती क्लाउडवर सुरक्षित आहे व सर्व उपकरणांवर एकाच वेळी दिसते. तरीही महिन्यातून एकदा बॅकअप घ्या.<br>'+
+      '<span style="color:#7A6636">Data syncs to the cloud across every device. Still, take a backup monthly.</span></div>',
+    '<button class="btn ghost spacer" onclick="exportData()">बॅकअप</button>'+
+     '<button class="btn ghost" onclick="closeModal()">बंद</button>'+
+     (admin?'<button class="btn" onclick="saveSettings()">जतन करा</button>':''));
+}
+async function saveSettings(){
+  if(!guard('settings'))return;
+  const patch={name:val('g_name')||TENANT.name,taluka:val('g_tal'),district:val('g_dist'),sarpanch:val('g_sar'),
+    gramsevak:val('g_gs'),fy:val('g_fy')||TENANT.fy,code:val('g_code'),
+    wards:val('g_wards').split(',').map(s=>s.trim()).filter(Boolean)};
+  if(!patch.wards.length) patch.wards=['1'];
+  try{
+    await gpRef().update(patch);
+    TENANT=Object.assign(TENANT,patch);
+    logAudit('तपशील बदल','कार्यालय','');
+    closeModal();renderNav();render();toast('तपशील जतन झाला.');
+  }catch(e){ toast('जतन झाले नाही.',true); }
+}
+async function del(coll,id){
+  if(!guard('delete'))return;
+  if(!confirm('ही नोंद कायमची पुसायची?'))return;
+  if(coll==='complaints'){
+    try{ await gpRef().collection('complaints').doc(id).delete(); }
+    catch(e){ return toast('पुसता आले नाही.',true); }
+    DB.complaints=DB.complaints.filter(x=>x.id!==id);
+    logAudit('नोंद पुसली',coll,id);renderBody();return toast('नोंद पुसली.');
+  }
+  DB[coll]=DB[coll].filter(x=>x.id!==id);
+  if(await saveModule(coll)){logAudit('नोंद पुसली',coll,id);renderBody();toast('नोंद पुसली.');}
+}
+
+/* ---------- Boot ---------- */
+if(FIREBASE_CONFIG.apiKey==='PASTE_API_KEY'){
+  document.getElementById('splash').innerHTML='<div style="max-width:380px;line-height:1.7">'+
+    '<strong>Firebase config missing</strong><br><span style="font-family:var(--sans);font-size:12px;color:#A9BAD2">'+
+    'Open this file and paste your Firebase project config into FIREBASE_CONFIG near the top of the script.</span></div>';
+}
+
+</script>
+</body>
+</html>
