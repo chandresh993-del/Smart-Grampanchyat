@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ENTRIX · Panchayat Subscriptions</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0A1F44;--amber:#F2A900;--paper:#EAEEF4;--rule:#C2CDDD;--rule-soft:#E1E7F0;
+  --muted:#5A6B85;--ok:#0F7B4F;--warn:#8A5A00;--bad:#A8231C;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans','Noto Sans Devanagari',system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:13.5px;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+.bar{background:var(--ink);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:30}
+.bar .t1{font-weight:700;font-size:15px;line-height:1.2}
+.bar .t2{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-top:3px}
+.bar .grow{margin-left:auto}
+main{padding:18px 20px 70px;max-width:1300px}
+
+.btn{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:4px;padding:6.5px 13px;cursor:pointer;
+  font-size:12.5px;white-space:nowrap}
+.btn:hover{background:#12305F}
+.btn.ghost{background:#fff;color:var(--ink);border-color:var(--rule)}
+.btn.ghost:hover{background:#F2F6FB}
+.btn.amber{background:var(--amber);border-color:#D69600;color:#2A1D00;font-weight:600}
+.btn.danger{background:#fff;color:var(--bad);border-color:#E3C2BF}
+.btn.sm{padding:3.5px 8px;font-size:11.5px}
+.btn.light{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#fff}
+.btn.light:hover{background:rgba(255,255,255,.22)}
+.btn.wide{width:100%;padding:9px;text-align:center}
+
+.tabs{display:flex;gap:2px;margin-bottom:14px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.tabb{background:none;border:0;border-bottom:3px solid transparent;padding:9px 14px;cursor:pointer;
+  font-weight:600;font-size:13px;color:var(--muted)}
+.tabb.on{color:var(--ink);border-bottom-color:var(--amber)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--rule);border-radius:5px;padding:12px 13px}
+.stat .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:22px;font-weight:600;margin-top:5px;font-variant-numeric:tabular-nums}
+.stat .n{font-size:11px;color:var(--muted);margin-top:1px}
+.stat.accent{border-left:3px solid var(--amber)}
+.stat.money{border-left:3px solid var(--ok)}
+
+.sheet{background:#fff;border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+.sheethead{padding:9px 13px;background:#F4F7FB;border-bottom:1px solid var(--rule);display:flex;
+  justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-weight:600;font-size:13px}
+.sheetwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:820px}
+th{text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  padding:8px 11px;background:#F8FAFD;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tbody tr:nth-child(even){background:#FBFCFE}
+tbody tr:hover{background:#F2F7FD}
+tfoot td{background:#F4F7FB;border-top:2px solid var(--rule);font-weight:600}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mr{font-family:'Noto Sans Devanagari',sans-serif}
+.sub{color:var(--muted);font-size:11.5px}
+.right{text-align:right}
+.rowacts{display:flex;gap:4px;flex-wrap:wrap}
+.pill{display:inline-block;padding:1.5px 8px;border-radius:16px;font-size:10.5px;font-weight:600;border:1px solid;white-space:nowrap}
+.p-trial{color:var(--warn);border-color:#E4D5AC;background:#FFFAEE}
+.p-active{color:var(--ok);border-color:#BADCC9;background:#F1F9F5}
+.p-dead{color:var(--bad);border-color:#E6C6C3;background:#FDF4F3}
+.p-soon{color:#7A3A12;border-color:#E8C8B6;background:#FDF1EC}
+
+.toolbar{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+input,select,textarea{padding:6.5px 10px;border:1px solid var(--rule);border-radius:4px;background:#fff;width:100%}
+input:focus,select:focus{border-color:var(--ink)}
+.search{min-width:190px;max-width:300px}
+select.filter{width:auto}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+
+#login{position:fixed;inset:0;background:linear-gradient(180deg,#0A1F44,#071634);display:grid;place-items:center;padding:20px;z-index:60}
+#login .box{background:#fff;border-radius:8px;padding:22px;width:100%;max-width:340px;box-shadow:0 28px 60px -20px rgba(0,0,0,.6)}
+#login h2{margin:0 0 4px;font-size:16px}
+#login p{margin:0 0 16px;font-size:12px;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:11px}
+.field.full{grid-column:1/-1}
+label{font-size:11.5px;font-weight:600;color:var(--muted)}
+.err{color:var(--bad);font-size:12px;min-height:17px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+
+.scrim{position:fixed;inset:0;background:rgba(7,22,52,.5);display:none;align-items:flex-start;justify-content:center;
+  padding:24px 14px;z-index:70;overflow-y:auto}
+.scrim.on{display:flex}
+.modal{background:#fff;border-radius:7px;width:100%;max-width:560px;box-shadow:0 30px 70px -14px rgba(7,22,52,.55)}
+.modal header{padding:13px 18px;border-bottom:1px solid var(--rule);background:#F8FAFD;border-radius:7px 7px 0 0;
+  display:flex;justify-content:space-between;align-items:center;gap:10px}
+.modal header h2{margin:0;font-size:15px}
+.modal header .x{background:none;border:0;font-size:21px;cursor:pointer;color:var(--muted);padding:0 4px;line-height:1}
+.modal .body{padding:16px 18px}
+.modal footer{padding:12px 18px;border-top:1px solid var(--rule);background:#F8FAFD;border-radius:0 0 7px 7px;
+  display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.modal footer .spacer{margin-right:auto}
+
+.note{border-left:3px solid var(--amber);background:#FFFBF2;padding:10px 13px;font-size:12px;color:#5C4A22;
+  margin-top:16px;max-width:76ch;border-radius:0 4px 4px 0}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,14px);opacity:0;background:var(--ink);color:#fff;
+  padding:9px 17px;border-radius:4px;font-size:12.5px;transition:.18s;z-index:90;pointer-events:none;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast.bad{background:var(--bad)}
+@media(max-width:700px){main{padding:14px 12px 60px}.bar{padding:10px 12px}.grid2{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <h2>ENTRIX Admin</h2>
+    <p>Panchayat subscription console</p>
+    <div class="field"><label>Email</label><input id="e" type="email" autocomplete="username"></div>
+    <div class="field"><label>Password</label><input id="p" type="password" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')signIn()"></div>
+    <div class="err" id="err"></div>
+    <button class="btn amber wide" onclick="signIn()">Sign in</button>
+  </div>
+</div>
+
+<div class="bar" id="bar" style="display:none">
+  <div><div class="t1">ENTRIX Innovation</div><div class="t2">Panchayat Subscriptions</div></div>
+  <div class="grow"></div>
+  <button class="btn light sm" onclick="load()">Refresh</button>
+  <button class="btn light sm" onclick="out()">Sign out</button>
+</div>
+<main id="main" style="display:none"></main>
+
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()">
+  <div class="modal" role="dialog" aria-modal="true">
+    <header><h2 id="modalTitle"></h2><button class="x" onclick="closeModal()" aria-label="Close">&times;</button></header>
+    <div class="body" id="modalBody"></div>
+    <footer id="modalFoot"></footer>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ---------------------------------------------------------------
+   ENTRIX vendor console — who is on trial, who paid, who is due.
+   Sign in with an account whose UID exists as a document in the
+   `admins` collection. That collection is created by hand in the
+   Firebase console and can never be written from a browser.
+   --------------------------------------------------------------- */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCLhZ6t6w4XemLPrHGHdpX_Ar-89aZAbPk",
+  authDomain: "gp-admin-cloud.firebaseapp.com",
+  projectId: "gp-admin-cloud",
+  storageBucket: "gp-admin-cloud.firebasestorage.app",
+  messagingSenderId: "851530921508",
+  appId: "1:851530921508:web:e5245360e512a5a9be0ab1"
+};
+
+const DEFAULT_PRICE = { 12: 6000, 6: 3500 };   // ₹ suggested in the renewal box; you can type over it
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth=firebase.auth(), fdb=firebase.firestore();
+const TSfrom=d=>firebase.firestore.Timestamp.fromDate(d);
+const FV=firebase.firestore.FieldValue;
+
+let ROWS=[], PAYMENTS=[], tab='subs', q='', filter='';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dmy=d=>{if(!d)return '—';const p=String(d).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;};
+const iso=d=>d.toISOString().slice(0,10);
+const inr=n=>'₹'+(Number(n)||0).toLocaleString('en-IN');
+const val=id=>{const e=$('#'+id);return e?e.value.trim():'';};
+function toast(m,bad){const t=$('#toast');t.textContent=m;t.className='on'+(bad?' bad':'');
+  clearTimeout(t._h);t._h=setTimeout(()=>{t.className='';},2800);}
+
+/* Indian financial year: 1 April – 31 March */
+function fyStart(d){ d=d||new Date(); const y=d.getMonth()>=3?d.getFullYear():d.getFullYear()-1; return new Date(y,3,1); }
+function fyLabel(){ const s=fyStart(); return s.getFullYear()+'-'+String((s.getFullYear()+1)%100).padStart(2,'0'); }
+function monthStart(){ const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),1); }
+
+const expOf=r=>r.expiresAt&&r.expiresAt.toDate?r.expiresAt.toDate():null;
+const daysOf=r=>{const e=expOf(r);return e?Math.ceil((e-new Date())/86400000):0;};
+function stateOf(r){
+  const d=daysOf(r);
+  if(r.status==='suspended') return {k:'suspended',cls:'p-dead',label:'Suspended'};
+  if(d<=0) return {k:'expired',cls:'p-dead',label:'Expired'};
+  if(r.status==='trial') return {k:'trial',cls:'p-trial',label:'Trial · '+d+'d'};
+  if(d<=30) return {k:'active',cls:'p-soon',label:'Due in '+d+'d'};
+  return {k:'active',cls:'p-active',label:'Active · '+d+'d'};
+}
+const payDate=p=>p.paidOn?new Date(p.paidOn):null;
+const paysFor=gpId=>PAYMENTS.filter(p=>p.gpId===gpId)
+  .sort((a,b)=>String(b.paidOn).localeCompare(String(a.paidOn)));
+
+/* ---------- auth ---------- */
+async function signIn(){
+  $('#err').textContent='Signing in…';
+  try{ await auth.signInWithEmailAndPassword(val('e'),$('#p').value); }
+  catch(err){ $('#err').textContent='Incorrect email or password.'; }
+}
+async function out(){ await auth.signOut(); }
+
+auth.onAuthStateChanged(async function(u){
+  if(!u){ $('#login').style.display='grid'; $('#bar').style.display='none'; $('#main').style.display='none'; return; }
+  try{
+    const a=await fdb.collection('admins').doc(u.uid).get();
+    if(!a.exists) throw new Error('This account is not an ENTRIX admin.');
+    $('#login').style.display='none'; $('#bar').style.display='flex'; $('#main').style.display='block';
+    await load();
+  }catch(e){ await auth.signOut(); $('#err').textContent=e.message||'Not authorised.'; }
+});
+
+/* ---------- load ---------- */
+async function load(){
+  $('#main').innerHTML='<div class="sheet"><div class="empty">Loading…</div></div>';
+  try{
+    const s=await fdb.collection('panchayats').get();
+    ROWS=s.docs.map(d=>Object.assign({gpId:d.id},d.data()));
+    ROWS.sort((a,b)=>(expOf(a)||0)-(expOf(b)||0));
+    try{
+      const ps=await fdb.collection('payments').get();
+      PAYMENTS=ps.docs.map(d=>Object.assign({id:d.id},d.data()));
+    }catch(e){ PAYMENTS=[]; }
+    render();
+  }catch(e){
+    $('#main').innerHTML='<div class="sheet"><div class="empty">Could not load: '+esc(e.message)+'</div></div>';
+  }
+}
+function go(t){ tab=t; q=''; filter=''; render(); }
+
+/* ---------- render ---------- */
+function render(){
+  const n=k=>ROWS.filter(r=>stateOf(r).k===k).length;
+  const dueSoon=ROWS.filter(function(r){return stateOf(r).k==='active'&&daysOf(r)<=30;}).length;
+  const fy0=fyStart(), m0=monthStart();
+  const revFY=PAYMENTS.filter(p=>payDate(p)&&payDate(p)>=fy0).reduce((t,p)=>t+(Number(p.amount)||0),0);
+  const revMonth=PAYMENTS.filter(p=>payDate(p)&&payDate(p)>=m0).reduce((t,p)=>t+(Number(p.amount)||0),0);
+  const revAll=PAYMENTS.reduce((t,p)=>t+(Number(p.amount)||0),0);
+
+  const tabs='<div class="tabs">'+
+    '<button class="tabb '+(tab==='subs'?'on':'')+'" onclick="go(\'subs\')">Panchayats</button>'+
+    '<button class="tabb '+(tab==='pay'?'on':'')+'" onclick="go(\'pay\')">Payments received</button>'+
+    '</div>';
+
+  const stats='<div class="stats">'+
+    '<div class="stat accent"><div class="k">Paying</div><div class="v">'+n('active')+'</div>'+
+      '<div class="n">'+dueSoon+' due within 30 days</div></div>'+
+    '<div class="stat accent"><div class="k">On trial</div><div class="v">'+n('trial')+'</div>'+
+      '<div class="n">follow these up</div></div>'+
+    '<div class="stat"><div class="k">Expired</div><div class="v">'+n('expired')+'</div>'+
+      '<div class="n">'+n('suspended')+' suspended</div></div>'+
+    '<div class="stat money"><div class="k">Received FY '+fyLabel()+'</div><div class="v">'+inr(revFY)+'</div>'+
+      '<div class="n">since 1 April</div></div>'+
+    '<div class="stat money"><div class="k">This month</div><div class="v">'+inr(revMonth)+'</div></div>'+
+    '<div class="stat"><div class="k">Total ever</div><div class="v">'+inr(revAll)+'</div>'+
+      '<div class="n">'+ROWS.length+' panchayats signed up</div></div>'+
+  '</div>';
+
+  $('#main').innerHTML = stats + tabs + (tab==='subs' ? subsView() : payView());
+}
+function refocus(){setTimeout(function(){const e=$('#q');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length);}},0);}
+
+function subsView(){
+  const list=ROWS.filter(function(r){
+    const hay=((r.name||'')+' '+(r.taluka||'')+' '+(r.district||'')+' '+r.gpId+' '+(r.gramsevak||'')+' '+(r.mobile||'')).toLowerCase();
+    if(q&&hay.indexOf(q.toLowerCase())<0) return false;
+    return !filter||stateOf(r).k===filter;
+  });
+  const rows=list.map(function(r){
+    const st=stateOf(r), e=expOf(r), ps=paysFor(r.gpId);
+    const last=ps[0];
+    const paid=ps.reduce((t,p)=>t+(Number(p.amount)||0),0);
+    const wa=r.mobile?'https://wa.me/91'+String(r.mobile).replace(/\D/g,'')+'?text='+
+      encodeURIComponent('नमस्कार, ग्रामपंचायत प्रशासन प्रणाली सदस्यत्वाबाबत. कोड: '+r.gpId):'';
+    return '<tr>'+
+      '<td><strong class="mr">'+esc(r.name)+'</strong>'+
+        '<div class="sub mr">ता. '+esc(r.taluka||'—')+', जि. '+esc(r.district||'—')+'</div>'+
+        '<div class="sub num">'+esc(r.gpId)+'</div></td>'+
+      '<td class="mr">'+esc(r.gramsevak||'—')+
+        (r.mobile?'<div class="sub num">'+esc(r.mobile)+(wa?' · <a href="'+wa+'" target="_blank" rel="noopener">WhatsApp</a>':'')+'</div>':'')+'</td>'+
+      '<td><span class="pill '+st.cls+'">'+st.label+'</span></td>'+
+      '<td class="num">'+(e?dmy(iso(e)):'—')+'</td>'+
+      '<td class="num right">'+(paid?inr(paid):'—')+
+        (last?'<div class="sub num">last '+dmy(last.paidOn)+'</div>':'')+'</td>'+
+      '<td><div class="rowacts">'+
+        '<button class="btn amber sm" onclick="renewBox(\''+r.gpId+'\')">Renew</button>'+
+        '<button class="btn ghost sm" onclick="extendTrial(\''+r.gpId+'\')">+15d trial</button>'+
+        '<button class="btn ghost sm" onclick="history(\''+r.gpId+'\')">History</button>'+
+        (r.status==='suspended'
+          ? '<button class="btn ghost sm" onclick="setStatus(\''+r.gpId+'\',\'active\')">Unsuspend</button>'
+          : '<button class="btn danger sm" onclick="setStatus(\''+r.gpId+'\',\'suspended\')">Suspend</button>')+
+      '</div></td></tr>';
+  }).join('');
+
+  return '<div class="toolbar">'+
+      '<input class="search" id="q" placeholder="Search village, taluka, code, Gram Sevak…" value="'+esc(q)+'" '+
+        'oninput="q=this.value;render();refocus()">'+
+      '<select class="filter" onchange="filter=this.value;render()">'+
+        ['','trial','active','expired','suspended'].map(k=>'<option value="'+k+'" '+(filter===k?'selected':'')+'>'+
+          (k===''?'All':k[0].toUpperCase()+k.slice(1))+'</option>').join('')+
+      '</select>'+
+      '<button class="btn ghost sm" onclick="exportSubs()">Export CSV</button>'+
+      '<span class="sub" style="margin-left:auto">'+list.length+' of '+ROWS.length+'</span>'+
+    '</div>'+
+    '<div class="sheet"><div class="sheethead">Panchayats <span class="sub" style="font-weight:400">sorted by expiry, soonest first</span></div>'+
+    '<div class="sheetwrap"><table>'+
+      '<thead><tr><th>Panchayat</th><th>Gram Sevak</th><th>Status</th><th>Valid until</th><th class="right">Paid to date</th><th>Actions</th></tr></thead>'+
+      '<tbody>'+(rows||'<tr><td colspan="6" class="empty">No panchayats match.</td></tr>')+'</tbody>'+
+    '</table></div></div>'+
+    '<div class="note"><strong>The top of this list is your call sheet.</strong> '+
+      'Renew records the money as well as extending the licence, so the Payments tab stays reconcilable against your books. '+
+      'Suspending blocks new entries immediately but never deletes anything.</div>';
+}
+
+function payView(){
+  const list=PAYMENTS.slice().sort((a,b)=>String(b.paidOn).localeCompare(String(a.paidOn)))
+    .filter(function(p){
+      if(!q) return true;
+      return ((p.gpName||'')+' '+(p.gpId||'')+' '+(p.mode||'')+' '+(p.ref||'')).toLowerCase().indexOf(q.toLowerCase())>-1;
+    });
+  const rows=list.map(p=>'<tr>'+
+    '<td class="num">'+dmy(p.paidOn)+'</td>'+
+    '<td><strong class="mr">'+esc(p.gpName||'—')+'</strong><div class="sub num">'+esc(p.gpId)+'</div></td>'+
+    '<td class="num right"><strong>'+inr(p.amount)+'</strong></td>'+
+    '<td>'+esc(p.mode||'—')+(p.ref?'<div class="sub num">'+esc(p.ref)+'</div>':'')+'</td>'+
+    '<td class="num">'+esc(p.months||'—')+' mo</td>'+
+    '<td class="sub">'+esc(p.note||'')+'</td>'+
+    '<td><button class="btn danger sm" onclick="deletePayment(\''+p.id+'\')">Delete</button></td></tr>').join('');
+  const total=list.reduce((t,p)=>t+(Number(p.amount)||0),0);
+  const foot=list.length?'<tr><td colspan="2" class="right">Total shown</td><td class="num right">'+inr(total)+'</td><td colspan="4"></td></tr>':'';
+
+  return '<div class="toolbar">'+
+      '<input class="search" id="q" placeholder="Search panchayat, code, UTR…" value="'+esc(q)+'" '+
+        'oninput="q=this.value;render();refocus()">'+
+      '<button class="btn ghost sm" onclick="exportPayments()">Export CSV for Tally</button>'+
+      '<span class="sub" style="margin-left:auto">'+list.length+' payments</span>'+
+    '</div>'+
+    '<div class="sheet"><div class="sheethead">Payments received</div><div class="sheetwrap"><table>'+
+      '<thead><tr><th>Date</th><th>Panchayat</th><th class="right">Amount</th><th>Mode / Ref</th><th>Period</th><th>Note</th><th></th></tr></thead>'+
+      '<tbody>'+(rows||'<tr><td colspan="7" class="empty">No payments recorded yet. Use <strong>Renew</strong> on the Panchayats tab.</td></tr>')+'</tbody>'+
+      (foot?'<tfoot>'+foot+'</tfoot>':'')+
+    '</table></div></div>'+
+    '<div class="note">Every renewal you record appears here. Export this for your accountant — '+
+      'it is the subscription income side of the books, separate from ENTRIX manufacturing sales.</div>';
+}
+
+/* ---------- modal ---------- */
+function modal(t,b,f){
+  $('#modalTitle').textContent=t; $('#modalBody').innerHTML=b;
+  $('#modalFoot').innerHTML=f||'<button class="btn ghost" onclick="closeModal()">Close</button>';
+  $('#scrim').classList.add('on');
+  const x=$('#modalBody').querySelector('input,select'); if(x) setTimeout(()=>x.focus(),50);
+}
+function closeModal(){ $('#scrim').classList.remove('on'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+/* ---------- renew (licence + payment in one step) ---------- */
+function baseFor(r){ const e=expOf(r), now=new Date(); return (e&&e>now)?e:now; }
+function previewTo(){
+  const r=ROWS.filter(x=>x.gpId===window._gp)[0]; if(!r) return;
+  const m=Number(val('r_months'))||12;
+  const to=new Date(baseFor(r)); to.setMonth(to.getMonth()+m);
+  $('#r_to').textContent=dmy(iso(to));
+  const amt=$('#r_amt');
+  if(amt && !amt._touched) amt.value=DEFAULT_PRICE[m]||'';
+}
+function renewBox(gpId){
+  const r=ROWS.filter(x=>x.gpId===gpId)[0]; if(!r) return;
+  window._gp=gpId;
+  const e=expOf(r);
+  modal('Renew · '+r.name,
+    '<div class="sub" style="margin-bottom:12px">Code <strong class="num">'+esc(gpId)+'</strong>'+
+      (e?' · currently valid until <strong>'+dmy(iso(e))+'</strong>':'')+'</div>'+
+    '<div class="grid2">'+
+      '<div class="field"><label>Period</label><select id="r_months" onchange="previewTo()">'+
+        '<option value="12">12 months</option><option value="6">6 months</option>'+
+        '<option value="3">3 months</option><option value="24">24 months</option></select></div>'+
+      '<div class="field"><label>Amount received (₹)</label>'+
+        '<input type="number" id="r_amt" onblur="this._touched=true" oninput="this._touched=true"></div>'+
+      '<div class="field"><label>Payment mode</label><select id="r_mode">'+
+        ['UPI','Bank transfer','Cheque','Cash','Other'].map(m=>'<option>'+m+'</option>').join('')+'</select></div>'+
+      '<div class="field"><label>Date received</label><input type="date" id="r_date" value="'+iso(new Date())+'"></div>'+
+      '<div class="field full"><label>Reference / UTR / cheque no.</label><input id="r_ref"></div>'+
+      '<div class="field full"><label>Note (optional)</label><input id="r_note"></div>'+
+    '</div>'+
+    '<div class="note" style="margin-top:14px">New expiry: <strong id="r_to">—</strong>. '+
+      'Renewing early never loses days — the new period is added to whatever is left.</div>',
+    '<button class="btn ghost spacer" onclick="closeModal()">Cancel</button>'+
+    '<button class="btn ghost" onclick="licenceOnly()">Extend without payment</button>'+
+    '<button class="btn amber" onclick="confirmRenew()">Record payment &amp; activate</button>');
+  previewTo();
+}
+async function applyRenew(months, payment){
+  const r=ROWS.filter(x=>x.gpId===window._gp)[0]; if(!r) return;
+  const to=new Date(baseFor(r)); to.setMonth(to.getMonth()+months);
+  try{
+    await fdb.collection('panchayats').doc(r.gpId).update({
+      status:'active',
+      plan: months===12?'annual':months===6?'half-yearly':months+'-month',
+      expiresAt:TSfrom(to), lastRenewedAt:FV.serverTimestamp()});
+    if(payment){
+      await fdb.collection('payments').add(Object.assign({
+        gpId:r.gpId, gpName:r.name, months:months,
+        recordedAt:FV.serverTimestamp()}, payment));
+    }
+    closeModal();
+    toast(r.name+' active until '+dmy(iso(to)));
+    await load();
+  }catch(e){ toast('Could not update: '+(e.message||''),true); }
+}
+function confirmRenew(){
+  const months=Number(val('r_months'))||12;
+  const amt=Number(val('r_amt'));
+  if(!amt||amt<=0){ $('#r_amt').focus(); return toast('Enter the amount received, or use "Extend without payment".',true); }
+  applyRenew(months,{amount:amt,mode:val('r_mode'),paidOn:val('r_date')||iso(new Date()),
+    ref:val('r_ref'),note:val('r_note')});
+}
+function licenceOnly(){
+  const months=Number(val('r_months'))||12;
+  if(!confirm('Extend the licence by '+months+' months WITHOUT recording any payment?')) return;
+  applyRenew(months,null);
+}
+
+async function extendTrial(gpId){
+  const r=ROWS.filter(x=>x.gpId===gpId)[0]; if(!r) return;
+  const to=new Date(baseFor(r).getTime()+15*86400000);
+  if(!confirm(r.name+'\n\nExtend the TRIAL to '+dmy(iso(to))+'?')) return;
+  try{
+    await fdb.collection('panchayats').doc(gpId).update({status:'trial',plan:'trial',expiresAt:TSfrom(to)});
+    toast('Trial extended to '+dmy(iso(to))); await load();
+  }catch(e){ toast('Could not update: '+(e.message||''),true); }
+}
+async function setStatus(gpId,status){
+  const r=ROWS.filter(x=>x.gpId===gpId)[0]; if(!r) return;
+  const msg=status==='suspended'
+    ? r.name+'\n\nSuspend? New entries stop immediately. Existing records stay readable and are never deleted.'
+    : r.name+'\n\nRestore access?';
+  if(!confirm(msg)) return;
+  try{
+    await fdb.collection('panchayats').doc(gpId).update({status:status});
+    toast(status==='suspended'?'Suspended.':'Access restored.'); await load();
+  }catch(e){ toast('Could not update: '+(e.message||''),true); }
+}
+function history(gpId){
+  const r=ROWS.filter(x=>x.gpId===gpId)[0]; if(!r) return;
+  const ps=paysFor(gpId);
+  const total=ps.reduce((t,p)=>t+(Number(p.amount)||0),0);
+  const body = ps.length
+    ? '<div class="sheet"><div class="sheetwrap"><table style="min-width:0">'+
+      '<thead><tr><th>Date</th><th class="right">Amount</th><th>Mode</th><th>Period</th></tr></thead><tbody>'+
+      ps.map(p=>'<tr><td class="num">'+dmy(p.paidOn)+'</td><td class="num right">'+inr(p.amount)+'</td>'+
+        '<td>'+esc(p.mode||'—')+(p.ref?'<div class="sub num">'+esc(p.ref)+'</div>':'')+'</td>'+
+        '<td class="num">'+esc(p.months||'—')+' mo</td></tr>').join('')+
+      '</tbody><tfoot><tr><td class="right">Total</td><td class="num right">'+inr(total)+'</td><td colspan="2"></td></tr></tfoot>'+
+      '</table></div></div>'
+    : '<div class="empty" style="padding:28px">No payments recorded for this panchayat yet.</div>';
+  modal('Payment history · '+r.name, body);
+}
+async function deletePayment(id){
+  const p=PAYMENTS.filter(x=>x.id===id)[0]; if(!p) return;
+  if(!confirm('Delete this payment record?\n\n'+(p.gpName||'')+' — '+inr(p.amount)+' on '+dmy(p.paidOn)+
+    '\n\nThis only removes the bookkeeping entry. It does NOT change the panchayat\'s expiry date.')) return;
+  try{ await fdb.collection('payments').doc(id).delete(); toast('Payment record deleted.'); await load(); }
+  catch(e){ toast('Could not delete.',true); }
+}
+
+/* ---------- exports ---------- */
+const Q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+function download(name,rows){
+  const csv='﻿'+rows.map(r=>r.map(Q).join(',')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=name; a.click(); URL.revokeObjectURL(a.href);
+  toast('CSV downloaded.');
+}
+function exportSubs(){
+  const rows=[['Code','Panchayat','Taluka','District','Gram Sevak','Mobile','Status','Plan','Valid until','Days left','Paid to date']];
+  ROWS.forEach(function(r){
+    const e=expOf(r), paid=paysFor(r.gpId).reduce((t,p)=>t+(Number(p.amount)||0),0);
+    rows.push([r.gpId,r.name,r.taluka,r.district,r.gramsevak,r.mobile,stateOf(r).k,r.plan,e?iso(e):'',daysOf(r),paid]);
+  });
+  download('panchayat-subscriptions-'+iso(new Date())+'.csv',rows);
+}
+function exportPayments(){
+  const rows=[['Date','Code','Panchayat','Amount','Mode','Reference','Months','Note']];
+  PAYMENTS.slice().sort((a,b)=>String(a.paidOn).localeCompare(String(b.paidOn)))
+    .forEach(p=>rows.push([p.paidOn,p.gpId,p.gpName,p.amount,p.mode,p.ref,p.months,p.note]));
+  download('panchayat-payments-'+iso(new Date())+'.csv',rows);
+}
+
+if(FIREBASE_CONFIG.apiKey==='PASTE_API_KEY'){
+  document.getElementById('err').textContent='Paste your Firebase config into this file first.';
+}
+</script>
+</body>
+</html>
